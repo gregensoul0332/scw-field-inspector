@@ -447,7 +447,7 @@ textarea{height:auto;padding:4px 6px;resize:vertical;}
               <th style="padding:5px 8px;text-align:center">Qty</th>
               <th style="padding:5px 8px;text-align:right;white-space:nowrap">Unit Price</th>
               <th style="padding:5px 8px;text-align:center">Status</th>
-              <th style="padding:5px 8px;min-width:220px;white-space:nowrap"></th>
+              <th style="padding:5px 8px;width:140px"></th>
             </tr>
           </thead>
           <tbody id="libResults">
@@ -1394,11 +1394,17 @@ async function searchLibrary(){
           <span class="badge ${bc}">${status}</span>
           ${(()=>{const exp=qrMeta[qNum]&&qrMeta[qNum].expDate;if(!exp)return'';const d=new Date(exp);return d<new Date()?'<span style="font-size:9px;color:var(--red);display:block;margin-top:2px">Expired</span>':''})()}
         </td>
-        <td style="padding:4px 8px;text-align:right;white-space:nowrap;min-width:220px">
-          <button class="btn btn-secondary" style="font-size:10px;padding:2px 8px;margin-right:3px" onclick="loadQuoteFromLib('${esc(qNum)}')">Load</button>
-          <button class="btn btn-ghost"     style="font-size:10px;padding:2px 8px;color:var(--navy);margin-right:3px" onclick="reviseQuoteFromLib('${esc(qNum)}')">Revise</button>
-          <button class="btn btn-ghost"     style="font-size:10px;padding:2px 8px;color:var(--green);border-color:var(--green);margin-right:3px" data-qnum="${esc(qNum)}" data-status="${status}" data-qrid="${(qrMeta[qNum]&&qrMeta[qNum].id)||''}" onclick="openUpdateQuote(this.dataset.qnum,this.dataset.status,this.dataset.qrid)">Update</button>
-          <button class="btn btn-ghost"     style="font-size:10px;padding:2px 8px;color:#6a1b9a;border-color:#6a1b9a" data-qnum="${esc(qNum)}" data-qrid="${(qrMeta[qNum]&&qrMeta[qNum].id)||''}" onclick="openPromote(this.dataset.qnum,this.dataset.qrid)">Promote</button>
+        <td style="padding:4px 8px;text-align:right;white-space:nowrap">
+          <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
+            <div>
+              <button class="btn btn-secondary" style="font-size:10px;padding:2px 8px;margin-right:2px" onclick="loadQuoteFromLib('${esc(qNum)}')">Load</button>
+              <button class="btn btn-ghost" style="font-size:10px;padding:2px 8px;color:var(--navy)" onclick="reviseQuoteFromLib('${esc(qNum)}')">Revise</button>
+            </div>
+            <div>
+              <button class="btn btn-ghost" style="font-size:10px;padding:2px 8px;color:var(--green);border-color:var(--green);margin-right:2px" data-qnum="${esc(qNum)}" data-status="${status}" data-qrid="${(qrMeta[qNum]&&qrMeta[qNum].id)||''}" onclick="openUpdateQuote(this.dataset.qnum,this.dataset.status,this.dataset.qrid)">Update</button>
+              <button class="btn btn-ghost" style="font-size:10px;padding:2px 8px;color:#6a1b9a;border-color:#6a1b9a" data-qnum="${esc(qNum)}" data-qrid="${(qrMeta[qNum]&&qrMeta[qNum].id)||''}" onclick="openPromote(this.dataset.qnum,this.dataset.qrid)">Promote</button>
+            </div>
+          </div>
         </td>
       </tr>`;
     }).join('');
