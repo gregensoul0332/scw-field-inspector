@@ -425,7 +425,7 @@ textarea{height:auto;padding:4px 6px;resize:vertical;}
       <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;flex-shrink:0">
         <div style="flex:0 0 220px">
           <div style="font-size:9px;font-weight:700;color:var(--navy);letter-spacing:0.8px;margin-bottom:3px">CUSTOMER</div>
-          <select id="libCustomer" style="width:100%;height:28px;font-size:12px;border:1px solid #c0c8d4;padding:0 6px;font-family:var(--font)"><option value="">— All Customers —</option></select>
+          <select id="libCustomer" style="width:100%;height:28px;font-size:12px;border:1px solid #c0c8d4;padding:0 6px;font-family:var(--font)" onchange="searchLibrary()"><option value="">— All Customers —</option></select>
         </div>
         <div style="flex:0 0 180px">
           <div style="font-size:9px;font-weight:700;color:var(--navy);letter-spacing:0.8px;margin-bottom:3px">PART NUMBER</div>
@@ -1324,9 +1324,9 @@ async function expireStaleQuotes(qrMeta){
 }
 
 async function searchLibrary(){
-  const custId=document.getElementById('libCustomer').value;
+  const custId=parseInt(document.getElementById('libCustomer').value)||null;
   const partRaw=document.getElementById('libPartNum').value.trim();
-  if(!custId&&!partRaw){showToast('Enter a customer or part number to search','info');return;}
+  if(!custId&&!partRaw){showToast('Select a customer or enter a part number to search','info');return;}
 
   const tbody=document.getElementById('libResults');
   tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text-muted)">Searching…</td></tr>';
