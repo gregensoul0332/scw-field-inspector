@@ -3,353 +3,1740 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SCW Field Inspector</title>
+<title>SCW Quote Entry</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
 <style>
 :root {
-  --navy:     #1F4A7D;
-  --navy-dk:  #163760;
-  --lt-blue:  #DAE3F3;
-  --green:    #2e7d32;
-  --amber:    #e65100;
-  --red:      #c62828;
-  --gray:     #dde2ea;
-  --gray-mid: #999;
-  --text:     #1a1f2e;
-  --text-muted:#6b7280;
-  --bg:       #f0f3f8;
-  --white:    #ffffff;
-  --font:     'Segoe UI', system-ui, sans-serif;
-  --mono:     'Consolas', 'Cascadia Code', monospace;
-  --radius:   4px;
-  --shadow:   0 2px 8px rgba(0,0,0,0.10);
+  --navy:#1F4A7D; --navy-dark:#163652; --navy-hover:#255a99;
+  --lt-blue:#DAE3F3; --lt-blue-2:#F0F4F8;
+  --gray:#CCCCCC; --gray-mid:#999999; --gray-light:#f5f6f8;
+  --text:#1a1a1a; --text-muted:#777777;
+  --red:#C62828; --green:#2E7D32; --amber:#E65100;
+  --font:'IBM Plex Sans',sans-serif; --mono:'IBM Plex Mono',monospace;
+  --radius:2px; --row-h:26px;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);font-size:12px;color:var(--text);background:var(--gray-light);min-height:100vh;}
 
-/* ── HEADER ── */
-.app-header{background:var(--navy);color:white;display:flex;align-items:center;gap:12px;padding:0 16px;height:44px;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,0.25);}
-.app-header .logo{font-size:12px;font-weight:700;letter-spacing:1.5px;opacity:0.9;}
-.app-header .title{font-size:13px;font-weight:700;letter-spacing:0.5px;}
-.app-header .sep{opacity:0.3;font-size:16px;}
-#statusBar{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:11px;opacity:0.85;}
-.status-dot{width:7px;height:7px;border-radius:50%;background:#999;flex-shrink:0;}
-.status-dot.connected{background:#4caf50;box-shadow:0 0 0 2px rgba(76,175,80,0.3);}
-.status-dot.error{background:#ef5350;}
+/* LOGIN SCREEN */
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px;}
+.login-card{background:white;border:1px solid var(--gray);padding:32px 40px;text-align:center;max-width:360px;width:100%;}
+.login-title{font-size:16px;font-weight:700;color:var(--navy);letter-spacing:1px;margin-bottom:6px;}
+.login-sub{font-size:11px;color:var(--text-muted);margin-bottom:20px;}
+.btn-signin{font-family:var(--font);font-size:12px;font-weight:700;background:var(--navy);color:white;border:none;padding:10px 24px;cursor:pointer;border-radius:var(--radius);width:100%;transition:background 0.15s;}
+.btn-signin:hover{background:var(--navy-hover);}
+.login-error{font-size:11px;color:var(--red);margin-top:8px;}
 
-/* ── LOGIN ── */
-#loginScreen{display:flex;flex:1;align-items:center;justify-content:center;}
-.login-card{background:white;border-radius:8px;box-shadow:var(--shadow);padding:40px;text-align:center;width:320px;}
-.login-card h2{color:var(--navy);font-size:18px;margin-bottom:6px;}
-.login-card p{color:var(--text-muted);font-size:12px;margin-bottom:24px;}
-.btn-login{background:var(--navy);color:white;border:none;padding:10px 28px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;width:100%;}
-.btn-login:hover{background:var(--navy-dk);}
-#loginError{color:var(--red);font-size:11px;margin-top:10px;min-height:16px;}
+/* HEADER */
+.app-header{background:var(--navy);height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 6px rgba(0,0,0,0.25);}
+.header-left{display:flex;align-items:center;gap:12px;}
+.header-divider{width:1px;height:28px;background:rgba(255,255,255,0.25);}
+.app-title{color:white;font-size:15px;font-weight:700;letter-spacing:1.5px;}
+.header-right{display:flex;align-items:center;gap:8px;}
+.btn-header{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:white;padding:5px 12px;font-size:11px;font-family:var(--font);font-weight:600;cursor:pointer;border-radius:var(--radius);letter-spacing:0.5px;transition:background 0.15s;display:flex;align-items:center;gap:5px;}
+.btn-header:hover{background:rgba(255,255,255,0.22);}
+.btn-header.primary{background:rgba(255,255,255,0.9);color:var(--navy);border-color:transparent;}
+.btn-header.primary:hover{background:white;}
+.user-chip{font-size:10px;color:rgba(255,255,255,0.75);padding:3px 8px;background:rgba(255,255,255,0.1);border-radius:10px;}
 
-/* ── MAIN ── */
-#mainApp{display:none;flex:1;flex-direction:column;overflow:hidden;}
-.toolbar{background:white;border-bottom:1px solid var(--gray);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;}
-.toolbar-label{font-size:10px;font-weight:700;color:var(--navy);letter-spacing:0.8px;}
-#listSelect{height:30px;font-size:12px;border:1px solid #c0c8d4;border-radius:var(--radius);padding:0 8px;font-family:var(--font);min-width:240px;background:white;}
-.btn{font-family:var(--font);font-size:12px;font-weight:600;border-radius:var(--radius);cursor:pointer;padding:0 14px;height:30px;border:1px solid transparent;transition:background 0.12s;}
-.btn-primary{background:var(--navy);color:white;}
-.btn-primary:hover{background:var(--navy-dk);}
-.btn-ghost{background:white;color:var(--navy);border-color:#c0c8d4;}
-.btn-ghost:hover{background:var(--lt-blue);}
-.btn-sm{font-size:10px;padding:0 8px;height:22px;}
-#searchBox{height:30px;font-size:12px;border:1px solid #c0c8d4;border-radius:var(--radius);padding:0 8px;font-family:var(--font);width:200px;}
-#resultMeta{font-size:11px;color:var(--text-muted);margin-left:auto;}
+/* SCREENS */
+.screen{display:none;} .screen.active{display:block;}
+.app-body{padding:10px 14px 60px;}
+.screen-tabs{display:flex;gap:2px;margin-bottom:10px;border-bottom:2px solid var(--navy);}
+.screen-tab{padding:5px 16px;font-size:11px;font-weight:600;font-family:var(--font);cursor:pointer;border:none;background:var(--lt-blue-2);color:var(--navy);letter-spacing:0.5px;border-radius:2px 2px 0 0;transition:background 0.12s;}
+.screen-tab:hover{background:var(--lt-blue);} .screen-tab.active{background:var(--navy);color:white;}
 
-/* ── TOGGLE ── */
-.filter-group{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);}
-.filter-group input[type=checkbox]{accent-color:var(--navy);width:13px;height:13px;}
+/* SECTION BAR */
+.section-bar{background:var(--navy);color:white;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:4px 10px;margin-bottom:0;display:flex;align-items:center;justify-content:space-between;}
 
-/* ── TABLE ── */
-.table-wrap{flex:1;overflow:auto;padding:0;}
-table{width:100%;border-collapse:collapse;font-size:12px;}
-thead th{background:var(--navy);color:white;padding:7px 10px;text-align:left;font-size:10px;font-weight:700;letter-spacing:0.8px;position:sticky;top:0;white-space:nowrap;z-index:10;}
-tbody tr{border-bottom:1px solid var(--gray);}
-tbody tr:hover{background:#f5f8fc;}
-tbody td{padding:5px 10px;vertical-align:middle;}
-.td-internal{font-family:var(--mono);font-size:11px;color:var(--navy);font-weight:600;}
-.td-display{font-size:12px;}
-.td-type{font-size:11px;color:var(--text-muted);}
-.td-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;letter-spacing:0.3px;}
-.badge-req{background:#fff3e0;color:var(--amber);}
-.badge-ro{background:#f5f5f5;color:#999;}
-.badge-hidden{background:#ffebee;color:var(--red);}
-.copy-btn{font-family:var(--mono);font-size:10px;background:#f0f3f8;border:1px solid #dde2ea;border-radius:3px;padding:1px 6px;cursor:pointer;color:var(--navy);transition:background 0.1s;}
-.copy-btn:hover{background:var(--lt-blue);}
-.copy-btn.copied{background:#e8f5e9;color:var(--green);border-color:#a5d6a7;}
+/* FORM CONTROLS */
+.field-label{font-size:9px;font-weight:700;color:var(--navy);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:2px;display:block;}
+input[type="text"],input[type="date"],input[type="number"],select,textarea{font-family:var(--font);font-size:11px;color:var(--text);background:white;border:1px solid #c0c8d4;border-radius:var(--radius);padding:0 6px;height:var(--row-h);width:100%;outline:none;transition:border-color 0.12s,background 0.12s;-webkit-appearance:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--navy);background:#f8faff;box-shadow:0 0 0 2px rgba(31,74,125,0.12);}
+input[readonly]{background:var(--lt-blue-2);color:var(--navy);font-weight:600;font-family:var(--mono);font-size:11px;border-color:#b0bfcf;cursor:default;}
+input[readonly]:focus{border-color:#b0bfcf;box-shadow:none;background:var(--lt-blue-2);}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231F4A7D'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;padding-right:22px;cursor:pointer;}
+textarea{height:auto;padding:4px 6px;resize:vertical;}
 
-/* ── EMPTY / LOADING ── */
-.state-row td{text-align:center;padding:40px;color:var(--text-muted);font-style:italic;}
-.spinner-inline{display:inline-block;width:14px;height:14px;border:2px solid #c0c8d4;border-top-color:var(--navy);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px;}
+/* QUOTE INFO */
+.qi-section{background:white;border:1px solid var(--gray);padding:8px 10px 10px;margin-bottom:10px;}
+.qi-row{display:grid;gap:6px 12px;margin-bottom:6px;} .qi-row:last-child{margin-bottom:0;}
+.qi-row-1{grid-template-columns:130px 200px 200px 130px;}
+.qi-row-2{grid-template-columns:130px 180px 140px 110px 110px;}
+.qi-row-3{grid-template-columns:1fr 180px;}
+.field-group{display:flex;flex-direction:column;}
+.last-quote-notice{font-size:9.5px;color:var(--text-muted);margin-top:2px;min-height:13px;display:flex;align-items:center;gap:3px;flex-wrap:wrap;}
+.lqn-load{color:var(--navy);text-decoration:underline;cursor:pointer;font-weight:600;margin-left:4px;}
+.lqn-load:hover{color:var(--navy-hover);}
+.badge{display:inline-block;padding:0 4px;border-radius:2px;font-weight:700;font-size:9px;line-height:14px;}
+.badge-won{background:#e8f5e9;color:var(--green);} .badge-lost{background:#ffebee;color:var(--red);}
+.badge-quoted{background:#fff3e0;color:var(--amber);} .badge-other{background:var(--lt-blue-2);color:var(--navy);}
+
+/* RATES */
+.rates-parts-wrapper{display:flex;gap:0;align-items:flex-start;}
+.rates-section{background:white;border:1px solid var(--gray);border-right:none;padding:6px 10px 8px;min-width:172px;flex-shrink:0;}
+.rates-title{font-size:9px;font-weight:700;color:var(--navy);letter-spacing:1.2px;text-transform:uppercase;padding-bottom:5px;margin-bottom:5px;border-bottom:1px solid var(--gray);}
+.rates-grid{display:grid;grid-template-columns:1fr auto;gap:3px 8px;align-items:center;}
+.rate-label{font-size:10px;color:var(--text);white-space:nowrap;}
+.rate-input{width:68px!important;text-align:right;font-family:var(--mono)!important;font-size:10px!important;height:22px!important;padding:0 4px!important;}
+.rates-add-btn-wrap{margin-top:8px;padding-top:8px;border-top:1px solid var(--gray);}
+
+/* PARTS TABLE */
+.parts-table-wrap{flex:1;overflow-x:auto;border:1px solid var(--gray);background:white;}
+.parts-table{border-collapse:collapse;width:100%;min-width:1100px;table-layout:fixed;}
+.parts-table col.c-partnum{width:78px;} .parts-table col.c-desc{width:130px;} .parts-table col.c-machine{width:88px;}
+.parts-table col.c-matgrp{width:46px;} .parts-table col.c-thick{width:48px;} .parts-table col.c-width{width:50px;}
+.parts-table col.c-length{width:50px;} .parts-table col.c-qtyreq{width:50px;} .parts-table col.c-qtyrun{width:50px;}
+.parts-table col.c-minrun{width:52px;} .parts-table col.c-pierces{width:56px;} .parts-table col.c-garnet{width:56px;}
+.parts-table col.c-setup{width:58px;} .parts-table col.c-jetbrick{width:60px;} .parts-table col.c-lasersetup{width:62px;}
+.parts-table col.c-laserpc{width:58px;} .parts-table col.c-unitprice{width:82px;} .parts-table col.c-remove{width:28px;}
+.parts-table thead tr{background:var(--lt-blue-2);}
+.parts-table thead th{font-size:9px;font-weight:700;color:var(--navy);letter-spacing:0.5px;text-transform:uppercase;padding:4px 3px;text-align:center;border-bottom:2px solid var(--navy);border-right:1px solid var(--gray);white-space:nowrap;overflow:hidden;user-select:none;}
+.parts-table thead th:last-child{border-right:none;}
+.parts-table tbody tr{border-bottom:1px solid #e8ecf0;}
+.parts-table tbody tr:nth-child(even){background:#fafbfd;}
+.parts-table tbody tr:hover{background:#f0f6ff;}
+.parts-table tbody td{padding:1px;border-right:1px solid #e0e4e8;vertical-align:middle;}
+.parts-table tbody td:last-child{border-right:none;text-align:center;}
+.pt-input{font-family:var(--font);font-size:10px;color:var(--text);background:transparent;border:1px solid transparent;border-radius:1px;padding:0 3px;height:22px;width:100%;outline:none;text-align:right;-webkit-appearance:none;}
+.pt-input.left{text-align:left;}
+.pt-input:focus{background:white;border-color:var(--navy);box-shadow:0 0 0 1px rgba(31,74,125,0.2);}
+.pt-select{font-family:var(--font);font-size:10px;color:var(--text);background:transparent;border:1px solid transparent;border-radius:1px;padding:0 14px 0 3px;height:22px;width:100%;outline:none;cursor:pointer;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%231F4A7D'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 3px center;}
+.pt-select:focus{background-color:white;border-color:var(--navy);box-shadow:0 0 0 1px rgba(31,74,125,0.2);}
+.pt-unitprice{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--navy);background:var(--lt-blue-2);text-align:right;padding:0 4px;height:24px;display:flex;align-items:center;justify-content:flex-end;}
+.btn-remove-part{font-family:var(--font);font-size:12px;font-weight:700;background:transparent;border:none;color:var(--gray-mid);cursor:pointer;width:24px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:1px;transition:color 0.1s,background 0.1s;margin:0 auto;}
+.btn-remove-part:hover{color:var(--red);background:#ffebee;}
+.btn-add-part{font-family:var(--font);font-size:10px;font-weight:600;background:var(--green);color:white;border:none;padding:4px 10px;cursor:pointer;border-radius:var(--radius);letter-spacing:0.3px;width:100%;transition:background 0.12s;}
+.btn-add-part:hover{background:#1b5e20;}
+.parts-empty{text-align:center;color:var(--text-muted);font-size:11px;font-style:italic;padding:16px;}
+
+/* MATERIALS TABLE */
+.materials-section{margin-top:10px;}
+.mat-table-wrap{background:white;border:1px solid var(--gray);border-top:none;overflow-x:auto;}
+.mat-table{border-collapse:collapse;width:100%;table-layout:fixed;}
+.mat-table col.mc-grp{width:60px;} .mat-table col.mc-desc{width:170px;} .mat-table col.mc-vname{width:130px;} .mat-table col.mc-vpn{width:90px;} .mat-table col.mc-cost{width:90px;}
+.mat-table col.mc-qty{width:60px;} .mat-table col.mc-ship{width:90px;} .mat-table col.mc-mkup{width:70px;}
+.mat-table col.mc-total{width:100px;} .mat-table col.mc-rem{width:30px;}
+.mat-table thead tr{background:var(--lt-blue-2);}
+.mat-table thead th{font-size:9px;font-weight:700;color:var(--navy);letter-spacing:0.5px;text-transform:uppercase;padding:4px 3px;text-align:center;border-bottom:2px solid var(--navy);border-right:1px solid var(--gray);white-space:nowrap;user-select:none;}
+.mat-table thead th:last-child{border-right:none;}
+.mat-table tbody tr{border-bottom:1px solid #e8ecf0;}
+.mat-table tbody tr:nth-child(even){background:#fafbfd;}
+.mat-table tbody tr:hover{background:#f0f6ff;}
+.mat-table tbody td{padding:1px;border-right:1px solid #e0e4e8;vertical-align:middle;}
+.mat-table tbody td:last-child{border-right:none;text-align:center;}
+.mat-totalcost{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--navy);background:var(--lt-blue-2);text-align:right;padding:0 4px;height:24px;display:flex;align-items:center;justify-content:flex-end;}
+.mat-empty{text-align:center;color:var(--text-muted);font-size:11px;font-style:italic;padding:12px;}
+.btn-add-mat{font-family:var(--font);font-size:10px;font-weight:600;background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.35);padding:2px 10px;cursor:pointer;border-radius:var(--radius);transition:background 0.12s;}
+.btn-add-mat:hover{background:rgba(255,255,255,0.25);}
+
+/* SCREEN 2 */
+.s2-layout{display:grid;grid-template-columns:1fr 320px;gap:10px;align-items:start;}
+.s2-card{background:white;border:1px solid var(--gray);margin-bottom:10px;}
+.s2-info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px 12px;padding:8px 10px;}
+.s2-info-item{display:flex;flex-direction:column;gap:1px;}
+.s2-info-label{font-size:9px;font-weight:700;color:var(--navy);letter-spacing:0.6px;text-transform:uppercase;}
+.s2-info-value{font-size:11px;color:var(--text);}
+.s2-summary-table{border-collapse:collapse;width:100%;}
+.s2-summary-table th{font-size:9px;font-weight:700;color:var(--navy);letter-spacing:0.5px;text-transform:uppercase;padding:3px 6px;text-align:right;background:var(--lt-blue-2);border-bottom:1px solid var(--navy);border-right:1px solid var(--gray);}
+.s2-summary-table th:first-child{text-align:left;} .s2-summary-table th:last-child{border-right:none;}
+.s2-summary-table td{font-size:10px;padding:3px 6px;border-bottom:1px solid #eee;border-right:1px solid #eee;text-align:right;vertical-align:middle;}
+.s2-summary-table td:first-child{text-align:left;} .s2-summary-table td:last-child{border-right:none;}
+.s2-summary-table tbody tr:hover{background:#f8faff;}
+.s2-line-total{font-family:var(--mono);font-weight:600;color:var(--navy);}
+.totals-panel{background:white;border:1px solid var(--gray);position:sticky;top:58px;}
+.totals-panel-header{background:var(--navy);color:white;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:6px 12px;}
+.totals-body{padding:10px 12px;}
+.totals-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:11px;}
+.totals-row.hours{color:var(--text-muted);font-size:10px;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid var(--gray);}
+.totals-label{color:var(--text-muted);}
+.totals-value{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--navy);}
+.totals-divider{height:1px;background:var(--gray);margin:6px 0;}
+.totals-row.final .totals-label{font-size:12px;font-weight:700;color:var(--navy);}
+.totals-row.final .totals-value{font-size:14px;font-family:var(--mono);color:var(--navy);}
+.expedite-row{display:grid;grid-template-columns:1fr 80px;gap:4px;margin:4px 0;}
+.moq-banner{background:#FFC107;color:#333;font-size:10px;font-weight:700;padding:5px 8px;border-radius:var(--radius);margin:6px 0;display:none;text-align:center;}
+.moq-banner.visible{display:block;}
+.override-section{margin-top:8px;padding-top:8px;border-top:1px solid var(--gray);}
+.override-toggle-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.toggle-label{font-size:10px;color:var(--text-muted);}
+.notes-field{margin-top:8px;}
+.notes-field textarea{height:52px;font-size:10px;resize:none;}
+.submit-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--gray);}
+.btn-back{font-family:var(--font);font-size:11px;font-weight:600;background:white;color:var(--navy);border:1px solid var(--navy);padding:7px 16px;cursor:pointer;border-radius:var(--radius);transition:background 0.12s;}
+.btn-back:hover{background:var(--lt-blue-2);}
+.btn-submit{font-family:var(--font);font-size:12px;font-weight:700;background:var(--navy);color:white;border:none;padding:8px 22px;cursor:pointer;border-radius:var(--radius);letter-spacing:0.5px;transition:background 0.12s;}
+.btn-submit:hover{background:var(--navy-hover);}
+.btn-submit:disabled{background:var(--gray-mid);cursor:not-allowed;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:white;border:1px solid var(--gray);width:560px;max-width:95vw;box-shadow:0 8px 32px rgba(0,0,0,0.25);border-radius:2px;overflow:hidden;}
+.modal-header{background:var(--navy);color:white;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:700;letter-spacing:1px;}
+.modal-close{background:none;border:none;color:rgba(255,255,255,0.7);font-size:18px;cursor:pointer;}
+.modal-close:hover{color:white;}
+.modal-body{padding:14px;}
+.modal-body p{font-size:12px;color:var(--text);margin-bottom:10px;line-height:1.5;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;}
+.btn{font-family:var(--font);font-size:11px;font-weight:600;padding:5px 14px;border-radius:var(--radius);cursor:pointer;border:1px solid transparent;letter-spacing:0.3px;transition:background 0.12s;}
+.btn-primary{background:var(--navy);color:white;} .btn-primary:hover{background:var(--navy-hover);}
+.btn-secondary{background:white;color:var(--navy);border-color:var(--navy);} .btn-secondary:hover{background:var(--lt-blue-2);}
+.btn-ghost{background:white;color:var(--text-muted);border-color:var(--gray);} .btn-ghost:hover{background:var(--gray-light);}
+
+/* STATUS + TOAST */
+.status-bar{position:fixed;bottom:0;left:0;right:0;background:var(--navy-dark);color:rgba(255,255,255,0.7);font-size:10px;padding:3px 14px;display:flex;align-items:center;gap:8px;z-index:100;}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--gray-mid);flex-shrink:0;}
+.status-dot.connected{background:#4CAF50;} .status-dot.error{background:var(--red);}
+.toast{position:fixed;top:56px;right:14px;background:var(--navy-dark);color:white;padding:8px 14px;font-size:11px;border-radius:2px;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:300;opacity:0;transform:translateY(-6px);transition:opacity 0.2s,transform 0.2s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);} .toast.success{background:var(--green);} .toast.error{background:var(--red);}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:6px;vertical-align:middle;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
-/* ── TOAST ── */
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:white;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:600;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:999;white-space:nowrap;}
-.toast.show{opacity:1;}
 </style>
 </head>
 <body>
 
-<div class="app-header">
-  <span class="logo">SCW</span>
-  <span class="sep">|</span>
-  <span class="title">FIELD INSPECTOR</span>
-  <div id="statusBar">
-    <div class="status-dot" id="statusDot"></div>
-    <span id="statusText">Signing in...</span>
-  </div>
-</div>
-
-<div id="loginScreen">
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen">
   <div class="login-card">
-    <h2>SCW Field Inspector</h2>
-    <p>Sign in with your Microsoft 365 account to inspect SharePoint list field names.</p>
-    <button class="btn-login" onclick="signIn()">Sign In</button>
-    <div id="loginError"></div>
+    <div class="login-title">SCW QUOTE ENTRY</div>
+    <div class="login-sub">Sign in with your Microsoft 365 account to continue</div>
+    <button class="btn-signin" onclick="signIn()">Sign in with Microsoft</button>
+    <div class="login-error" id="loginError"></div>
   </div>
 </div>
 
-<div id="mainApp" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
-  <div class="toolbar">
-    <span class="toolbar-label">LIST</span>
-    <select id="listSelect" onchange="onListChange()">
-      <option value="">— Select a list —</option>
-    </select>
-    <button class="btn btn-primary" onclick="loadFields()">Inspect</button>
-    <input type="text" id="searchBox" placeholder="Filter fields..." oninput="filterTable()">
-    <div class="filter-group">
-      <input type="checkbox" id="hideReadOnly" onchange="filterTable()">
-      <label for="hideReadOnly">Hide read-only</label>
-    </div>
-    <div class="filter-group">
-      <input type="checkbox" id="hideHidden" checked onchange="filterTable()">
-      <label for="hideHidden">Hide hidden</label>
-    </div>
-    <button class="btn btn-ghost" onclick="exportCSV()" id="btnExport" style="display:none">Export CSV</button>
-    <span id="resultMeta"></span>
+<!-- MAIN APP (hidden until signed in) -->
+<div id="mainApp" style="display:none">
+
+<div class="app-header">
+  <div class="header-left">
+    <div class="header-divider"></div>
+    <div class="app-title">SCW QUOTE ENTRY</div>
   </div>
-  <div class="table-wrap">
-    <table id="fieldsTable">
-      <thead>
-        <tr>
-          <th style="width:280px">Internal Name</th>
-          <th>Display Name</th>
-          <th style="width:140px">Type</th>
-          <th style="width:90px">Flags</th>
-          <th style="width:60px"></th>
-        </tr>
-      </thead>
-      <tbody id="fieldsTbody">
-        <tr class="state-row"><td colspan="5">Select a list and click Inspect</td></tr>
-      </tbody>
-    </table>
+  <div class="header-right">
+    <span class="user-chip" id="userChip"></span>
+    <button class="btn-header" onclick="openLibrary()">&#128194; Quote Library</button>
+    <button class="btn-header" onclick="startFresh()">&#10005; Start Fresh</button>
+    <button class="btn-header primary" onclick="goToScreen2()">Review &amp; Submit &#8250;</button>
   </div>
 </div>
 
+<div class="app-body">
+  <div class="screen-tabs">
+    <button class="screen-tab active" id="tab1" onclick="showScreen(1)">1 &mdash; QUOTE ENTRY</button>
+    <button class="screen-tab"        id="tab2" onclick="showScreen(2)">2 &mdash; REVIEW &amp; SUBMIT</button>
+  </div>
+
+  <!-- SCREEN 1 -->
+  <div id="screen1" class="screen active">
+    <div class="section-bar" style="margin-bottom:6px">QUOTE INFORMATION</div>
+    <div class="qi-section">
+      <div class="qi-row qi-row-1">
+        <div class="field-group">
+          <label class="field-label">Quote Number</label>
+          <input type="text" id="fQuoteNumber" readonly tabindex="-1">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Customer</label>
+          <select id="fCustomer" tabindex="1" onchange="onCustomerChange()"><option value="">— Select —</option></select>
+          <div class="last-quote-notice" id="lastQuoteNotice"></div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Contact</label>
+          <select id="fContact" tabindex="2"><option value="">— Select —</option></select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">RFQ Number</label>
+          <input type="text" id="fRFQ" tabindex="3" placeholder="RFQ #">
+        </div>
+      </div>
+      <div class="qi-row qi-row-2">
+        <div class="field-group">
+          <label class="field-label">Quoted By</label>
+          <select id="fQuotedBy" tabindex="4"><option value="Greg">Greg</option><option value="Sam">Sam</option></select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Order Type</label>
+          <select id="fOrderType" tabindex="-1"><option value="">— Select —</option></select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Date Received</label>
+          <input type="date" id="fDateReceived" tabindex="5">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Lead Time (days)</label>
+          <input type="text" id="fLeadTime" tabindex="6" placeholder="e.g. 10">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Expires</label>
+          <input type="date" id="fExpiration" tabindex="7">
+        </div>
+      </div>
+      <div class="qi-row qi-row-3">
+        <div class="field-group">
+          <label class="field-label">Description</label>
+          <input type="text" id="fDescription" tabindex="7" placeholder="Brief job description">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Material Supplied By</label>
+          <select id="fMatSupplied" tabindex="8"><option value="SCW">SCW</option><option value="Customer">Customer</option><option value="Mixed">Mixed</option></select>
+        </div>
+      </div>
+      <div style="display:flex;gap:24px;padding:4px 2px 2px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--navy);cursor:pointer">
+          <input type="checkbox" id="fCofC" style="width:14px;height:14px;accent-color:var(--navy)">
+          C of C Required
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--navy);cursor:pointer">
+          <input type="checkbox" id="fMillCert" style="width:14px;height:14px;accent-color:var(--navy)">
+          Mill Cert Required
+        </label>
+      </div>
+    </div>
+
+    <div class="section-bar" style="position:relative"><button class="btn-add-mat" id="btnAddPart" onclick="addPart()">+ Add Part</button><span style="position:absolute;left:50%;transform:translateX(-50%)">PARTS</span></div>
+    <div class="rates-parts-wrapper">
+      <div class="rates-section">
+        <div class="rates-title">Rates</div>
+        <div class="rates-grid">
+          <span class="rate-label">Machine ($/hr)</span>
+          <input type="number" id="rMachineRate" class="pt-input rate-input" value="150"  min="0" step="0.01" onchange="recalcAll()">
+          <span class="rate-label">Pierce ($/ea)</span>
+          <input type="number" id="rPierceRate"  class="pt-input rate-input" value="0.10" min="0" step="0.01" onchange="recalcAll()">
+          <span class="rate-label">Garnet ($/lb)</span>
+          <input type="number" id="rGarnetRate"  class="pt-input rate-input" value="1.50" min="0" step="0.01" onchange="recalcAll()">
+          <span class="rate-label">Expedite ($/hr)</span>
+          <input type="number" id="rExpediteRate" class="pt-input rate-input" value="150" min="0" step="0.01">
+          <span class="rate-label">Tax Rate (%)</span>
+          <input type="number" id="rTaxRate"     class="pt-input rate-input" value="7"    min="0" step="0.01">
+          <span class="rate-label">Min Order ($)</span>
+          <input type="number" id="rMinOrder"    class="pt-input rate-input" value="150"  min="0" step="1">
+        </div>
+      </div>
+      <div class="parts-table-wrap">
+        <table class="parts-table">
+          <colgroup>
+            <col class="c-partnum"><col class="c-desc"><col class="c-machine"><col class="c-matgrp">
+            <col class="c-thick"><col class="c-width"><col class="c-length"><col class="c-qtyreq">
+            <col class="c-qtyrun"><col class="c-minrun"><col class="c-pierces"><col class="c-garnet">
+            <col class="c-setup"><col class="c-jetbrick"><col class="c-lasersetup"><col class="c-laserpc">
+            <col class="c-unitprice"><col class="c-remove">
+          </colgroup>
+          <thead><tr>
+            <th>Part #</th><th>Description</th><th>Machine</th><th>Mat Grp</th>
+            <th>Thick</th><th>Width</th><th>Length</th><th>Qty Req</th>
+            <th>Qty/Run</th><th>Min/Run</th><th>Pierces/Run</th><th>Garnet/Run</th>
+            <th>Setup/Run</th><th>Jetbrick/Run</th><th>Laser Setup</th><th>Laser/Pc</th>
+            <th>Unit Price</th><th></th>
+          </tr></thead>
+          <tbody id="partsTbody"><tr><td colspan="18" class="parts-empty">No parts added yet — click + Add Part</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="materials-section">
+      <div class="section-bar" style="position:relative"><button class="btn-add-mat" id="btnAddMat" onclick="addMaterial()">+ Add Material</button><span style="position:absolute;left:50%;transform:translateX(-50%)">MATERIALS</span></div>
+      <div class="mat-table-wrap">
+        <table class="mat-table">
+          <colgroup><col class="mc-grp"><col class="mc-desc"><col class="mc-vname"><col class="mc-vpn"><col class="mc-cost"><col class="mc-qty"><col class="mc-ship"><col class="mc-mkup"><col class="mc-total"><col class="mc-rem"></colgroup>
+          <thead><tr><th>Mat Grp</th><th>Description</th><th>Vendor Name</th><th>Vendor P/N</th><th>Unit Cost</th><th>Qty</th><th>Shipping</th><th>Markup %</th><th>Total Cost</th><th></th></tr></thead>
+          <tbody id="matTbody"><tr><td colspan="10" class="mat-empty">No materials added yet — click + Add Material</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /screen1 -->
+
+  <!-- SCREEN 2 -->
+  <div id="screen2" class="screen">
+    <div class="s2-layout">
+      <div>
+        <div class="section-bar" style="margin-bottom:0">QUOTE SUMMARY</div>
+        <div class="s2-card" style="border-top:none"><div class="s2-info-grid" id="s2InfoGrid"></div></div>
+        <div class="section-bar" style="margin-top:10px;margin-bottom:0">PARTS</div>
+        <div class="s2-card" style="border-top:none">
+          <table class="s2-summary-table">
+            <thead><tr><th style="text-align:left">Part #</th><th style="text-align:left">Description</th><th>Machine</th><th>Mat Grp</th><th>Qty Req</th><th>Qty/Run</th><th>Runs</th><th>Unit Price</th><th>Line Total</th></tr></thead>
+            <tbody id="s2PartsTbody"></tbody>
+          </table>
+        </div>
+        <div class="section-bar" style="margin-top:10px;margin-bottom:0">MATERIALS</div>
+        <div class="s2-card" style="border-top:none">
+          <table class="s2-summary-table">
+            <thead><tr><th style="text-align:left">Group</th><th style="text-align:left">Description</th><th>Total Cost</th></tr></thead>
+            <tbody id="s2MatTbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="totals-panel">
+          <div class="totals-panel-header">TOTALS</div>
+          <div class="totals-body">
+            <div class="totals-row hours"><span class="totals-label">Total Machine Hours</span><span class="totals-value" id="s2Hours">—</span></div>
+            <div class="totals-row"><span class="totals-label">Job Subtotal</span><span class="totals-value" id="s2Subtotal">—</span></div>
+            <div style="margin:6px 0">
+              <div style="font-size:9px;font-weight:700;color:var(--navy);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:3px">Expedite</div>
+              <div class="expedite-row">
+                <select id="s2ExpediteType" style="font-size:10px;height:24px" onchange="updateTotals()"><option value="None">None</option><option value="Flat Fee">Flat Fee</option><option value="Hourly">Hourly</option></select>
+                <input type="number" id="s2ExpediteAmt" class="pt-input" style="background:white;border:1px solid #c0c8d4;height:24px" value="0" min="0" step="0.01" oninput="updateTotals()">
+              </div>
+              <div class="totals-row" id="s2ExpediteRow" style="display:none"><span class="totals-label">Expedite Total</span><span class="totals-value" id="s2ExpediteTotal">—</span></div>
+            </div>
+            <div class="totals-row" id="s2TaxRow" style="display:none"><span class="totals-label" id="s2TaxLabel">Tax (7%)</span><span class="totals-value" id="s2TaxAmt">—</span></div>
+            <div class="totals-divider"></div>
+            <div class="moq-banner" id="s2MoqBanner">&#9888; MINIMUM ORDER — Total set to <span id="s2MinOrderDisplay"></span></div>
+            <div class="totals-row final"><span class="totals-label">JOB TOTAL</span><span class="totals-value" id="s2FinalTotal">—</span></div>
+            <div class="override-section">
+              <div class="override-toggle-row">
+                <span class="toggle-label" style="font-size:10px;font-weight:700;color:var(--navy);letter-spacing:0.5px">OVERRIDE TOTAL</span>
+                <input type="number" id="s2OverrideAmt" class="pt-input" style="background:white;border:1px solid #c0c8d4;height:24px;width:110px" placeholder="0.00 = use Job Total" min="0" step="0.01" oninput="updateTotals()">
+              </div>
+              <div class="notes-field">
+                <label class="field-label">Notes / Override Reason</label>
+                <textarea id="s2Notes" rows="3" placeholder="Optional notes..."></textarea>
+              </div>
+            </div>
+            <div class="submit-row">
+              <button class="btn-back" onclick="showScreen(1)">&#8249; Back to Entry</button>
+              <button class="btn-submit" id="btnSubmit" onclick="submitQuote()">Submit Quote</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /screen2 -->
+</div><!-- /app-body -->
+</div><!-- /mainApp -->
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modalLoadPrompt">
+  <div class="modal">
+    <div class="modal-header">LOAD PREVIOUS QUOTE <button class="modal-close" onclick="closeModal('modalLoadPrompt')">&times;</button></div>
+    <div class="modal-body"><p id="modalLoadMsg"></p>
+      <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('modalLoadPrompt')">Skip</button><button class="btn btn-secondary" onclick="confirmLoad()">Load This Quote</button></div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalLibrary">
+  <div class="modal" style="width:960px;max-height:82vh;display:flex;flex-direction:column">
+    <div class="modal-header">QUOTE LIBRARY <button class="modal-close" onclick="closeModal('modalLibrary')">&times;</button></div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:0;overflow:hidden;padding-bottom:0">
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;flex-shrink:0">
+        <div style="flex:0 0 220px">
+          <div style="font-size:9px;font-weight:700;color:var(--navy);letter-spacing:0.8px;margin-bottom:3px">CUSTOMER</div>
+          <select id="libCustomer" style="width:100%;height:28px;font-size:12px;border:1px solid #c0c8d4;padding:0 6px;font-family:var(--font)"><option value="">— All Customers —</option></select>
+        </div>
+        <div style="flex:0 0 180px">
+          <div style="font-size:9px;font-weight:700;color:var(--navy);letter-spacing:0.8px;margin-bottom:3px">PART NUMBER</div>
+          <input type="text" id="libPartNum" style="width:100%;height:28px;font-size:12px;border:1px solid #c0c8d4;padding:0 6px;box-sizing:border-box;font-family:var(--font)" placeholder="Search part #..." onkeydown="if(event.key==='Enter')searchLibrary()">
+        </div>
+        <button class="btn btn-primary" style="height:28px;padding:0 16px;flex-shrink:0" onclick="searchLibrary()">Search</button>
+        <button class="btn btn-ghost" style="height:28px;padding:0 10px;flex-shrink:0" onclick="clearLibSearch()">Clear</button>
+        <span id="libResultCount" style="font-size:11px;color:var(--text-muted);margin-left:auto;align-self:center"></span>
+      </div>
+      <div style="overflow-y:auto;flex:1;border:1px solid var(--gray);min-height:260px;max-height:460px">
+        <table style="width:100%;border-collapse:collapse;font-size:11px">
+          <thead>
+            <tr style="background:var(--navy);color:white;position:sticky;top:0">
+              <th style="padding:5px 8px;text-align:left;font-weight:700;letter-spacing:0.5px;white-space:nowrap">Quote #</th>
+              <th style="padding:5px 8px;text-align:left;white-space:nowrap">Date</th>
+              <th style="padding:5px 8px;text-align:left;white-space:nowrap">Part #</th>
+              <th style="padding:5px 8px;text-align:left">Description</th>
+              <th style="padding:5px 8px;text-align:center">Machine</th>
+              <th style="padding:5px 8px;text-align:center">Qty</th>
+              <th style="padding:5px 8px;text-align:right;white-space:nowrap">Unit Price</th>
+              <th style="padding:5px 8px;text-align:center">Status</th>
+              <th style="padding:5px 8px"></th>
+            </tr>
+          </thead>
+          <tbody id="libResults">
+            <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-muted);font-style:italic">Enter a customer or part number and click Search</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-actions" style="padding:10px 0 0;flex-shrink:0">
+        <button class="btn btn-ghost" onclick="closeModal('modalLibrary')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalSuccess">
+  <div class="modal">
+    <div class="modal-header" style="background:var(--green)">QUOTE SUBMITTED <button class="modal-close" onclick="closeModal('modalSuccess')">&times;</button></div>
+    <div class="modal-body"><p id="modalSuccessMsg" style="font-size:13px;text-align:center;padding:10px 0"></p>
+      <div class="modal-actions"><button class="btn btn-primary" onclick="afterSubmitSuccess()">Start New Quote</button></div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalError">
+  <div class="modal">
+    <div class="modal-header" style="background:var(--red)">SUBMISSION ERROR <button class="modal-close" onclick="closeModal('modalError')">&times;</button></div>
+    <div class="modal-body"><p id="modalErrorMsg"></p>
+      <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('modalError')">Close</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalUpdateQuote">
+  <div class="modal" style="width:420px">
+    <div class="modal-header">UPDATE QUOTE STATUS <button class="modal-close" onclick="closeModal('modalUpdateQuote')">&times;</button></div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:11px;font-weight:700;color:var(--navy)" id="uqTitle"></div>
+      <div>
+        <div class="field-label" style="margin-bottom:3px">Status</div>
+        <select id="uqStatus" style="width:100%;height:28px;font-size:12px;border:1px solid #c0c8d4;padding:0 6px;font-family:var(--font)" onchange="onUqStatusChange()">
+          <option value="Quoted">Quoted</option>
+          <option value="Accepted">Accepted</option>
+          <option value="Declined">Declined</option>
+          <option value="Lost">Lost</option>
+          <option value="Expired">Expired</option>
+        </select>
+      </div>
+      <div id="uqWinLossRow">
+        <div class="field-label" style="margin-bottom:3px">Win/Loss Reason</div>
+        <input type="text" id="uqWinLossReason" style="width:100%;height:28px;font-size:12px;border:1px solid #c0c8d4;padding:0 6px;box-sizing:border-box;font-family:var(--font)" placeholder="e.g. Price, Lead time, No bid...">
+      </div>
+      <div id="uqPORow">
+        <div class="field-label" style="margin-bottom:3px">PO Number</div>
+        <input type="text" id="uqPONumber" style="width:100%;height:28px;font-size:12px;border:1px solid #c0c8d4;padding:0 6px;box-sizing:border-box;font-family:var(--font)" placeholder="Customer PO #">
+      </div>
+      <div class="modal-actions" style="margin-top:4px">
+        <button class="btn btn-ghost" onclick="closeModal('modalUpdateQuote')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitQuoteUpdate()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalPromote">
+  <div class="modal" style="width:700px;max-height:85vh;display:flex;flex-direction:column">
+    <div class="modal-header" style="background:var(--green)">PROMOTE TO JOB <button class="modal-close" onclick="closeModal('modalPromote')">&times;</button></div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:10px;overflow:hidden">
+      <div style="font-size:11px;color:var(--text-muted)">Creates one Job Register row per part. All rows share the same PO# and job details.</div>
+      <!-- Header inputs -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+        <div>
+          <div class="field-label" style="margin-bottom:3px">PO # <span style="color:var(--red)">*</span></div>
+          <input type="text" id="pmPO" style="width:100%;height:28px;font-size:12px;border:1px solid #c0c8d4;padding:0 6px;box-sizing:border-box;font-family:var(--font)" placeholder="Customer PO #">
+        </div>
+        <div>
+          <div class="field-label" style="margin-bottom:3px">Due Date</div>
+          <input type="date" id="pmDueDate" style="width:100%;height:28px;font-size:12px;border:1px solid #c0c8d4;padding:0 6px;box-sizing:border-box;font-family:var(--font)">
+        </div>
+        <div>
+          <div class="field-label" style="margin-bottom:3px">Q Level</div>
+          <select id="pmQLevel" style="width:100%;height:28px;font-size:12px;border:1px solid #c0c8d4;padding:0 6px;font-family:var(--font)">
+            <option value="">— Select —</option>
+            <option>Q5</option><option>Q4</option><option>Q3</option><option>Q2</option><option>Q1</option>
+          </select>
+        </div>
+        <div>
+          <div class="field-label" style="margin-bottom:3px">Drawing Rev</div>
+          <input type="text" id="pmDrawingRev" style="width:100%;height:28px;font-size:12px;border:1px solid #c0c8d4;padding:0 6px;box-sizing:border-box;font-family:var(--font)" placeholder="e.g. B">
+        </div>
+      </div>
+      <!-- Parts table -->
+      <div style="font-size:10px;font-weight:700;color:var(--navy);letter-spacing:0.8px;margin-top:4px">PARTS TO PROMOTE</div>
+      <div style="overflow-y:auto;border:1px solid var(--gray);flex:1;min-height:120px;max-height:300px">
+        <table style="width:100%;border-collapse:collapse;font-size:11px">
+          <thead>
+            <tr style="background:var(--navy);color:white;position:sticky;top:0">
+              <th style="padding:5px 8px;width:30px"><input type="checkbox" id="pmCheckAll" onchange="pmToggleAll(this.checked)" style="accent-color:white"></th>
+              <th style="padding:5px 8px;text-align:left">Part #</th>
+              <th style="padding:5px 8px;text-align:left">Description</th>
+              <th style="padding:5px 8px;text-align:center">Machine</th>
+              <th style="padding:5px 8px;text-align:left">Material</th>
+              <th style="padding:5px 8px;text-align:center">Thickness</th>
+              <th style="padding:5px 8px;text-align:center">Qty</th>
+              <th style="padding:5px 8px;text-align:center">Laser</th>
+            </tr>
+          </thead>
+          <tbody id="pmPartsTbody"></tbody>
+        </table>
+      </div>
+      <div class="modal-actions" style="padding-top:4px">
+        <button class="btn btn-ghost" onclick="closeModal('modalPromote')">Cancel</button>
+        <button class="btn btn-primary" style="background:var(--green);border-color:var(--green)" onclick="submitPromote()">Create Jobs</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalConfirmFresh">
+  <div class="modal" style="width:400px">
+    <div class="modal-header">START NEW QUOTE <button class="modal-close" onclick="closeModal('modalConfirmFresh')">&times;</button></div>
+    <div class="modal-body">
+      <p>Clear all entered data and start a new quote?</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('modalConfirmFresh')">Cancel</button>
+        <button class="btn btn-primary" onclick="closeModal('modalConfirmFresh');doStartFresh()">Clear &amp; Start New</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="status-dot" id="statusDot"></div>
+  <span id="statusText">Signing in...</span>
+  <span style="margin-left:auto;opacity:0.5">v6</span>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
 'use strict';
-const TENANT_ID = 'a96e5f0b-8768-4736-8a66-1a7d41450f19';
-const CLIENT_ID = 'dd8d2db6-a9d2-400f-af12-3b1d0c52545c';
-const SITE      = 'https://mideast.sharepoint.com/sites/SCWQMS';
-const SP_SCOPE  = 'https://mideast.sharepoint.com/AllSites.Write';
+
+/* ── MSAL CONFIG ────────────────────────────────────────────── */
+const TENANT_ID   = 'a96e5f0b-8768-4736-8a66-1a7d41450f19';
+const CLIENT_ID   = 'dd8d2db6-a9d2-400f-af12-3b1d0c52545c';
+const SITE        = 'https://mideast.sharepoint.com/sites/SCWQMS';
+const SP_SCOPE    = 'https://mideast.sharepoint.com/AllSites.Write';
+const SP_API      = `${SITE}/_api/web/lists/getbytitle`;
 
 let msalInstance = null;
-let spToken      = null;
-let allFields    = []; // raw field data for current list
+let spToken = null;
+let isSubmitting = false;
 
-/* ── AUTH ── */
+/* ── AUTH ───────────────────────────────────────────────────── */
 async function initAuth() {
-  const cfg = {
-    auth: { clientId: CLIENT_ID, authority: `https://login.microsoftonline.com/${TENANT_ID}` },
+  const msalConfig = {
+    auth: {
+      clientId: CLIENT_ID,
+      authority: `https://login.microsoftonline.com/${TENANT_ID}`,
+      redirectUri: window.location.origin + window.location.pathname,
+    },
     cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false }
   };
-  msalInstance = new msal.PublicClientApplication(cfg);
+  msalInstance = new msal.PublicClientApplication(msalConfig);
   await msalInstance.initialize();
+  // Handle redirect response
   try {
     const resp = await msalInstance.handleRedirectPromise();
     if (resp) { spToken = resp.accessToken; showApp(resp.account); return; }
-  } catch(e) { console.warn(e); }
+  } catch(e) { console.warn('Redirect handler:', e); }
+
+  // Check for existing account
   const accounts = msalInstance.getAllAccounts();
   if (accounts.length > 0) {
     try {
-      const r = await msalInstance.acquireTokenSilent({ scopes:[SP_SCOPE], account:accounts[0] });
-      spToken = r.accessToken; showApp(accounts[0]); return;
-    } catch(e) {}
+      const result = await msalInstance.acquireTokenSilent({
+        scopes: [SP_SCOPE], account: accounts[0]
+      });
+      spToken = result.accessToken;
+      showApp(accounts[0]);
+      return;
+    } catch(e) { /* fall through to login screen */ }
   }
+  // Show login screen
   document.getElementById('loginScreen').style.display = 'flex';
-  setStatus('', 'Not signed in');
 }
 
 async function signIn() {
-  document.getElementById('loginError').textContent = '';
   try {
-    if(!msalInstance) await initAuth();
-    await msalInstance.loginRedirect({ scopes:[SP_SCOPE] });
+    document.getElementById('loginError').textContent = '';
+    await msalInstance.loginRedirect({ scopes: [SP_SCOPE] });
+  } catch(e) {
+    document.getElementById('loginError').textContent = 'Sign-in failed: ' + e.message;
   }
-  catch(e) { document.getElementById('loginError').textContent = 'Sign-in failed: ' + e.message; }
 }
 
 async function getToken() {
   const accounts = msalInstance.getAllAccounts();
   if (!accounts.length) throw new Error('Not signed in');
-  const r = await msalInstance.acquireTokenSilent({ scopes:[SP_SCOPE], account:accounts[0] });
-  return r.accessToken;
+  const result = await msalInstance.acquireTokenSilent({
+    scopes: [SP_SCOPE], account: accounts[0]
+  });
+  return result.accessToken;
 }
 
 function showApp(account) {
   document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('mainApp').style.display    = 'flex';
+  document.getElementById('mainApp').style.display = 'block';
   const name = account.name || account.username;
+  // Store first name for QuotedBy auto-fill
+  state.loginFirstName = name.split(' ')[0]||name;
+  document.getElementById('userChip').textContent = name;
   setStatus('connected', `Connected \u2022 ${name}`);
-  loadListNames();
+  initApp();
 }
 
-function setStatus(type, msg) {
-  const dot  = document.getElementById('statusDot');
-  dot.className = 'status-dot' + (type==='connected'?' connected':type==='error'?' error':'');
-  document.getElementById('statusText').textContent = msg;
-}
-
-/* ── LISTS ── */
-async function loadListNames() {
-  try {
-    const token = await getToken();
-    const res = await fetch(
-      `${SITE}/_api/web/lists?$select=Title&$filter=Hidden eq false and BaseTemplate eq 100&$orderby=Title`,
-      { headers: { Accept:'application/json;odata=nometadata', Authorization:`Bearer ${token}` } }
-    );
-    const json = await res.json();
-    const lists = json.value || [];
-    const sel = document.getElementById('listSelect');
-    sel.innerHTML = '<option value="">— Select a list —</option>';
-    lists.forEach(l => {
-      const o = document.createElement('option');
-      o.value = l.Title; o.textContent = l.Title;
-      sel.appendChild(o);
-    });
-  } catch(e) { setStatus('error', 'Could not load lists: ' + e.message); }
-}
-
-function onListChange() {
-  const v = document.getElementById('listSelect').value;
-  if (v) loadFields();
-}
-
-/* ── FIELDS ── */
-async function loadFields() {
-  const listName = document.getElementById('listSelect').value;
-  if (!listName) { showToast('Select a list first', 'warn'); return; }
-
-  const tbody = document.getElementById('fieldsTbody');
-  tbody.innerHTML = `<tr class="state-row"><td colspan="5"><span class="spinner-inline"></span>Loading fields for <strong>${listName}</strong>…</td></tr>`;
-  document.getElementById('btnExport').style.display = 'none';
-  document.getElementById('resultMeta').textContent = '';
-  allFields = [];
-
-  try {
-    const token = await getToken();
-    const res = await fetch(
-      `${SITE}/_api/web/lists/getbytitle('${encodeURIComponent(listName)}')/fields?$select=InternalName,Title,TypeAsString,Required,ReadOnlyField,Hidden,Choices&$orderby=InternalName`,
-      { headers: { Accept:'application/json;odata=nometadata', Authorization:`Bearer ${token}` } }
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
-    allFields = (json.value || []);
-    filterTable();
-    document.getElementById('btnExport').style.display = '';
-  } catch(e) {
-    tbody.innerHTML = `<tr class="state-row"><td colspan="5" style="color:var(--red)">Error: ${e.message}</td></tr>`;
+/* ── SHAREPOINT API ─────────────────────────────────────────── */
+async function spFetch(url, options = {}) {
+  const token = await getToken();
+  const headers = {
+    'Accept': 'application/json;odata=nometadata',
+    'Authorization': `Bearer ${token}`,
+    ...options.headers
+  };
+  const res = await fetch(url, { ...options, headers });
+  if (!res.ok) {
+    const errText = await res.text().catch(() => res.statusText);
+    throw new Error(`SP ${options.method||'GET'} failed (${res.status}): ${errText}`);
   }
+  return res;
 }
 
-function filterTable() {
-  const q          = document.getElementById('searchBox').value.toLowerCase();
-  const hideRO     = document.getElementById('hideReadOnly').checked;
-  const hideHidden = document.getElementById('hideHidden').checked;
+async function spGet(listName, query = '') {
+  const res = await spFetch(`${SP_API}('${encodeURIComponent(listName)}')/items${query}`);
+  const json = await res.json();
+  return json.value || json.d?.results || [];
+}
 
-  const filtered = allFields.filter(f => {
-    if (hideHidden && f.Hidden)      return false;
-    if (hideRO    && f.ReadOnlyField) return false;
-    if (q && !f.InternalName.toLowerCase().includes(q) && !f.Title.toLowerCase().includes(q) && !f.TypeAsString.toLowerCase().includes(q)) return false;
-    return true;
+async function spPatch(listName, itemId, data) {
+  const token = await getToken();
+  const res = await fetch(`${SP_API}('${encodeURIComponent(listName)}')/items(${itemId})`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json;odata=nometadata',
+      'Content-Type': 'application/json;odata=nometadata',
+      'Authorization': `Bearer ${token}`,
+      'X-HTTP-Method': 'MERGE',
+      'IF-MATCH': '*',
+    },
+    body: JSON.stringify(data)
   });
-
-  const tbody = document.getElementById('fieldsTbody');
-  if (!filtered.length) {
-    tbody.innerHTML = `<tr class="state-row"><td colspan="5">No fields match</td></tr>`;
-    document.getElementById('resultMeta').textContent = '';
-    return;
+  if (!res.ok && res.status !== 204) {
+    const raw = await res.text().catch(() => '');
+    let msg = `HTTP ${res.status}`;
+    try { const j=JSON.parse(raw); msg=j?.error?.message?.value||j?.error?.message||raw; } catch(e){}
+    throw new Error(`[${listName}] PATCH ${msg}`);
   }
+}
 
-  tbody.innerHTML = filtered.map(f => {
-    const flags = [];
-    if (f.Required)      flags.push(`<span class="td-badge badge-req">Required</span>`);
-    if (f.ReadOnlyField) flags.push(`<span class="td-badge badge-ro">Read-only</span>`);
-    if (f.Hidden)        flags.push(`<span class="td-badge badge-hidden">Hidden</span>`);
-    const choiceHint = f.Choices && f.Choices.length
-      ? `<div style="font-size:10px;color:var(--text-muted);margin-top:2px">${f.Choices.join(' · ')}</div>` : '';
+async function spPost(listName, data) {
+  const token = await getToken();
+  const res = await fetch(`${SP_API}('${encodeURIComponent(listName)}')/items`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json;odata=nometadata',
+      'Content-Type': 'application/json;odata=nometadata',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    const raw = await res.text().catch(() => '');
+    console.error(`spPost [${listName}] status ${res.status}:`, raw);
+    let msg = `HTTP ${res.status}`;
+    try {
+      const j = JSON.parse(raw);
+      msg = j?.error?.message?.value || j?.error?.message || j?.message || raw;
+    } catch(e) { msg = raw || res.statusText; }
+    throw new Error(`[${listName}] ${msg}`);
+  }
+  return await res.json();
+}
+
+/* ── APP STATE ──────────────────────────────────────────────── */
+const state = {
+  customers:[], contacts:[], colParts:[], colMaterials:[],
+  lastQuoteData:null, nextPartId:1, nextMatId:1,
+};
+
+/* ── INIT APP ───────────────────────────────────────────────── */
+async function initApp() {
+  setDefaultDate();
+  await generateQuoteNumber();
+  // Auto-set QuotedBy from login
+  if(state.loginFirstName){
+    const dd=document.getElementById('fQuotedBy');
+    // Try matching existing option first
+    const match=Array.from(dd.options).find(o=>o.value.toLowerCase()===state.loginFirstName.toLowerCase());
+    dd.value=match?match.value:state.loginFirstName;
+  }
+  await loadCustomers();
+  await loadContacts();
+  await loadOrderTypeChoices();
+  expireAllStaleQuotes(); // fire-and-forget: sweeps all stale Quoted rows
+  renderPartsTable();
+  renderMaterialsTable();
+  addPart(); // start with one blank row
+}
+
+/* ── TEMPLATES ──────────────────────────────────────────────── */
+function newPart() {
+  return { id:state.nextPartId++, partNumber:'', description:'', machine:'Waterjet',
+    matGroup:'', thickness:'', width:'', length:'', qtyReq:'', qtyPerRun:'',
+    minPerRun:'', piercesPerRun:'', garnetPerRun:'', setupPerRun:'',
+    jetbrickPerRun:'', laserSetup:'', laserPerPiece:'',
+    vendorName:'', vendorPartNumber:'', vendorCost:'', vendorMarkup:'' };
+}
+function newMaterial() {
+  return { id:state.nextMatId++, matGroup:'', materialDescription:'',
+    vendorName:'', vendorPartNumber:'',
+    unitCost:'', qty:'', shipping:'', markupPct:'' };
+}
+
+/* ── RATES ──────────────────────────────────────────────────── */
+function getRate(id){ return parseFloat(document.getElementById(id).value)||0; }
+function machineRate(){ return getRate('rMachineRate'); }
+function pierceRate(){  return getRate('rPierceRate');  }
+function garnetRate(){  return getRate('rGarnetRate');  }
+
+/* ── CALCULATIONS ───────────────────────────────────────────── */
+function calcMatTotal(m) {
+  return ((parseFloat(m.unitCost)||0)*(parseFloat(m.qty)||0)+(parseFloat(m.shipping)||0))
+        *(1+(parseFloat(m.markupPct)||0)/100);
+}
+function calcAllocMat(p) {
+  if (!p.matGroup||!state.colMaterials.length) return 0;
+  const mat=state.colMaterials.find(m=>m.matGroup===p.matGroup); if(!mat) return 0;
+  const total=calcMatTotal(mat); if(!total) return 0;
+  const w=parseFloat(p.width)||0,l=parseFloat(p.length)||0,qr=parseFloat(p.qtyPerRun)||0;
+  const grpArea=state.colParts.filter(x=>x.matGroup===p.matGroup)
+    .reduce((s,x)=>s+(parseFloat(x.width)||0)*(parseFloat(x.length)||0)*(parseFloat(x.qtyPerRun)||0),0);
+  return grpArea===0?0:(w*l*qr)/grpArea*total;
+}
+function calcUnitPrice(p) {
+  if(p.machine==='Subcontracted'){
+    const q=parseFloat(p.qtyReq)||0; if(!q) return 0;
+    return (parseFloat(p.vendorCost)||0)*(1+(parseFloat(p.vendorMarkup)||0)/100)/q;
+  }
+  const qtyReq=parseFloat(p.qtyReq)||0,qtyPerRun=parseFloat(p.qtyPerRun)||0;
+  if(!qtyReq||!qtyPerRun) return 0;
+  const runCost=(parseFloat(p.minPerRun)||0)/60*machineRate()
+               +(parseFloat(p.piercesPerRun)||0)*pierceRate()
+               +(parseFloat(p.garnetPerRun)||0)*garnetRate()
+               +(parseFloat(p.setupPerRun)||0)
+               +(parseFloat(p.jetbrickPerRun)||0);
+  const allocMat=calcAllocMat(p);
+  const laserSetup=parseFloat(p.laserSetup)||0,laserPc=parseFloat(p.laserPerPiece)||0;
+  return (runCost+allocMat)/qtyPerRun+(qtyReq>0?laserSetup/qtyReq:0)+laserPc;
+}
+function calcLineTotal(p){ return calcUnitPrice(p)*(parseFloat(p.qtyReq)||0); }
+function calcSubtotal(){ return state.colParts.reduce((s,p)=>s+calcLineTotal(p),0); }
+function calcExpediteTotal(){
+  const type=document.getElementById('s2ExpediteType').value;
+  const amt=parseFloat(document.getElementById('s2ExpediteAmt').value)||0;
+  return type==='Flat Fee'?amt:type==='Hourly'?amt*getRate('rExpediteRate'):0;
+}
+function isTaxable(){
+  const dd=document.getElementById('fCustomer');
+  const sel=dd.options[dd.selectedIndex];
+  return sel&&sel.dataset.taxable==='1';
+}
+function calcTax(sub){ return isTaxable()?sub*(getRate('rTaxRate')/100):0; }
+function calcFinalTotal(sub){
+  const ovAmt=parseFloat(document.getElementById('s2OverrideAmt').value)||0;
+  if(ovAmt>0) return ovAmt;
+  return Math.max(getRate('rMinOrder'),sub+calcExpediteTotal()+calcTax(sub));
+}
+
+/* ── FORMAT ─────────────────────────────────────────────────── */
+function fmtCurrency(v){ if(!isFinite(v)||v===0) return '—'; return '$'+v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+function esc(v){ if(v==null)return''; return String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ── RECALC ─────────────────────────────────────────────────── */
+function recalcAll(){
+  state.colParts.forEach(p=>{
+    const up=document.getElementById(`up-${p.id}`);
+    if(up) up.textContent=fmtCurrency(calcUnitPrice(p));
+  });
+}
+
+/* ── PARTS CRUD ─────────────────────────────────────────────── */
+function addPart(){ const p=newPart();state.colParts.push(p);renderPartsTable();setTimeout(()=>{const el=document.getElementById(`pn-${p.id}`);if(el)el.focus();},30); }
+function removePart(id){ state.colParts=state.colParts.filter(p=>p.id!==id);renderPartsTable();recalcAll(); }
+function updatePart(id,field,value){
+  const p=state.colParts.find(x=>x.id===id);if(!p)return;
+  p[field]=value;
+  if(field==='machine'){renderPartsTable();recalcAll();return;}
+  const up=document.getElementById(`up-${id}`);if(up)up.textContent=fmtCurrency(calcUnitPrice(p));
+  if(['matGroup','width','length','qtyPerRun','vendorCost','vendorMarkup','qtyReq'].includes(field))recalcAll();
+}
+
+/* ── MATERIALS CRUD ─────────────────────────────────────────── */
+function addMaterial(){ const m=newMaterial();state.colMaterials.push(m);renderMaterialsTable();setTimeout(()=>{const el=document.getElementById(`mg2-${m.id}`);if(el)el.focus();},30); }
+function removeMaterial(id){ state.colMaterials=state.colMaterials.filter(m=>m.id!==id);renderMaterialsTable();recalcAll(); }
+function updateMaterial(id,field,value){
+  const m=state.colMaterials.find(x=>x.id===id);if(!m)return;
+  m[field]=value;
+  const tc=document.getElementById(`mt-${id}`);if(tc)tc.textContent=fmtCurrency(calcMatTotal(m));
+  recalcAll();
+}
+
+/* ── RENDER PARTS ───────────────────────────────────────────── */
+function renderPartsTable(){
+  const tbody=document.getElementById('partsTbody');
+  if(!state.colParts.length){tbody.innerHTML='<tr><td colspan="18" class="parts-empty">No parts added yet — click + Add Part</td></tr>';return;}
+  const dash='<td style="text-align:center;color:var(--text-muted);font-size:10px;background:#fdf0e6">—</td>';
+  const machSel=(p)=>`<select class="pt-select" id="mc-${p.id}" data-pi onchange="updatePart(${p.id},'machine',this.value)" onkeydown="ptTab(event)"><option ${p.machine==='Waterjet'?'selected':''}>Waterjet</option><option ${p.machine==='Router'?'selected':''}>Router</option><option ${p.machine==='Subcontracted'?'selected':''}>Subcontracted</option></select>`;
+  tbody.innerHTML=state.colParts.map(p=>{
+    if(p.machine==='Subcontracted') return `<tr style="background:#fdf5ee">
+    <td><input class="pt-input left" id="pn-${p.id}" data-pi value="${esc(p.partNumber)}" placeholder="P/N" onchange="updatePart(${p.id},'partNumber',this.value)" onkeydown="ptTab(event)"></td>
+    <td><input class="pt-input left" id="de-${p.id}" data-pi value="${esc(p.description)}" placeholder="Desc" onchange="updatePart(${p.id},'description',this.value)" onkeydown="ptTab(event)"></td>
+    <td>${machSel(p)}</td>
+    ${dash}${dash}${dash}${dash}
+    <td><input class="pt-input" id="qr-${p.id}" data-pi value="${esc(p.qtyReq)}" placeholder="0" onchange="updatePart(${p.id},'qtyReq',this.value)" onkeydown="ptTab(event)"></td>
+    ${dash}
+    <td style="background:#fdf5ee"><input class="pt-input left" id="vn-${p.id}" data-pi value="${esc(p.vendorName)}" placeholder="Vendor Name" onchange="updatePart(${p.id},'vendorName',this.value)" onkeydown="ptTab(event)"></td>
+    <td style="background:#fdf5ee"><input class="pt-input left" id="vp-${p.id}" data-pi value="${esc(p.vendorPartNumber)}" placeholder="Vendor P/N" onchange="updatePart(${p.id},'vendorPartNumber',this.value)" onkeydown="ptTab(event)"></td>
+    <td style="background:#fdf5ee"><input class="pt-input" id="vc-${p.id}" data-pi value="${esc(p.vendorCost)}" placeholder="$ Cost" onchange="updatePart(${p.id},'vendorCost',this.value)" onkeydown="ptTab(event)"></td>
+    <td style="background:#fdf5ee"><input class="pt-input" id="vm-${p.id}" data-pi value="${esc(p.vendorMarkup)}" placeholder="Mkup%" onchange="updatePart(${p.id},'vendorMarkup',this.value)" onkeydown="ptTab(event)"></td>
+    ${dash}${dash}${dash}
+    <td><div class="pt-unitprice" id="up-${p.id}">${fmtCurrency(calcUnitPrice(p))}</div></td>
+    <td><button class="btn-remove-part" onclick="removePart(${p.id})">&times;</button></td>
+  </tr>`;
     return `<tr>
-      <td class="td-internal">${esc(f.InternalName)}</td>
-      <td class="td-display">${esc(f.Title)}${choiceHint}</td>
-      <td class="td-type">${esc(f.TypeAsString)}</td>
-      <td>${flags.join(' ')}</td>
-      <td><button class="copy-btn" onclick="copyField('${esc(f.InternalName)}', this)">${esc(f.InternalName)}</button></td>
-    </tr>`;
+    <td><input class="pt-input left" id="pn-${p.id}" data-pi value="${esc(p.partNumber)}"    placeholder="P/N"   onchange="updatePart(${p.id},'partNumber',this.value)"    onkeydown="ptTab(event)"></td>
+    <td><input class="pt-input left" id="de-${p.id}" data-pi value="${esc(p.description)}"   placeholder="Desc"  onchange="updatePart(${p.id},'description',this.value)"   onkeydown="ptTab(event)"></td>
+    <td>${machSel(p)}</td>
+    <td><input class="pt-input"      id="mg-${p.id}" data-pi value="${esc(p.matGroup)}"       placeholder="A"     onchange="updatePart(${p.id},'matGroup',this.value)"      onkeydown="ptTab(event)"></td>
+    <td><input class="pt-input"      id="th-${p.id}" data-pi value="${esc(p.thickness)}"      placeholder="0.000" onchange="updatePart(${p.id},'thickness',this.value)"     onkeydown="ptTab(event)"></td>
+    <td><input class="pt-input"      id="wi-${p.id}" data-pi value="${esc(p.width)}"          placeholder="0.00"  onchange="updatePart(${p.id},'width',this.value)"         onkeydown="ptTab(event)"></td>
+    <td><input class="pt-input"      id="le-${p.id}" data-pi value="${esc(p.length)}"         placeholder="0.00"  onchange="updatePart(${p.id},'length',this.value)"        onkeydown="ptTab(event)"></td>
+    <td><input class="pt-input"      id="qr-${p.id}" data-pi value="${esc(p.qtyReq)}"         placeholder="0"     onchange="updatePart(${p.id},'qtyReq',this.value)"        onkeydown="ptTab(event)"></td>
+    <td><input class="pt-input"      id="qp-${p.id}" data-pi value="${esc(p.qtyPerRun)}"      placeholder="0"     onchange="updatePart(${p.id},'qtyPerRun',this.value)"     onkeydown="ptTab(event)"></td>
+    <td><input class="pt-input"      id="mi-${p.id}" data-pi value="${esc(p.minPerRun)}"      placeholder="0"     onchange="updatePart(${p.id},'minPerRun',this.value)"     onkeydown="ptTab(event)"></td>
+    <td><input class="pt-input"      id="pi-${p.id}" data-pi value="${esc(p.piercesPerRun)}"  placeholder="0"     onchange="updatePart(${p.id},'piercesPerRun',this.value)" onkeydown="ptTab(event)"></td>
+    <td><input class="pt-input"      id="ga-${p.id}" data-pi value="${esc(p.garnetPerRun)}"   placeholder="0"     onchange="updatePart(${p.id},'garnetPerRun',this.value)"  onkeydown="ptTab(event)"></td>
+    <td><input class="pt-input"      id="su-${p.id}" data-pi value="${esc(p.setupPerRun)}"    placeholder="0.00"  onchange="updatePart(${p.id},'setupPerRun',this.value)"   onkeydown="ptTab(event)"></td>
+    <td><input class="pt-input"      id="jb-${p.id}" data-pi value="${esc(p.jetbrickPerRun)}" placeholder="0.00"  onchange="updatePart(${p.id},'jetbrickPerRun',this.value)" onkeydown="ptTab(event)"></td>
+    <td><input class="pt-input"      id="ls-${p.id}" data-pi value="${esc(p.laserSetup)}"     placeholder="0.00"  onchange="updatePart(${p.id},'laserSetup',this.value)"    onkeydown="ptTab(event)"></td>
+    <td><input class="pt-input"      id="lp-${p.id}" data-pi value="${esc(p.laserPerPiece)}"  placeholder="0.00"  onchange="updatePart(${p.id},'laserPerPiece',this.value)" onkeydown="ptTab(event)"></td>
+    <td><div class="pt-unitprice" id="up-${p.id}">${fmtCurrency(calcUnitPrice(p))}</div></td>
+    <td><button class="btn-remove-part" onclick="removePart(${p.id})">&times;</button></td>
+  </tr>`;
   }).join('');
-
-  document.getElementById('resultMeta').textContent =
-    `${filtered.length} field${filtered.length!==1?'s':''} · ${allFields.length} total`;
 }
 
-function copyField(text, btn) {
-  navigator.clipboard.writeText(text).then(() => {
-    btn.textContent = '✓ Copied';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = text; btn.classList.remove('copied'); }, 1500);
+/* ── RENDER MATERIALS ───────────────────────────────────────── */
+function renderMaterialsTable(){
+  const tbody=document.getElementById('matTbody');
+  if(!state.colMaterials.length){tbody.innerHTML='<tr><td colspan="10" class="mat-empty">No materials added yet — click + Add Material</td></tr>';return;}
+  tbody.innerHTML=state.colMaterials.map(m=>`<tr>
+    <td><input class="pt-input"      id="mg2-${m.id}" data-mi value="${esc(m.matGroup)}"            placeholder="A"    onchange="updateMaterial(${m.id},'matGroup',this.value)"            onkeydown="mtTab(event)"></td>
+    <td><input class="pt-input left" id="md-${m.id}"  data-mi value="${esc(m.materialDescription)}" placeholder="Desc" onchange="updateMaterial(${m.id},'materialDescription',this.value)" onkeydown="mtTab(event)"></td>
+    <td><input class="pt-input left" id="mv-${m.id}"  data-mi value="${esc(m.vendorName)}"          placeholder="Vendor" onchange="updateMaterial(${m.id},'vendorName',this.value)"        onkeydown="mtTab(event)"></td>
+    <td><input class="pt-input"      id="mp-${m.id}"  data-mi value="${esc(m.vendorPartNumber)}"     placeholder="P/N"  onchange="updateMaterial(${m.id},'vendorPartNumber',this.value)"   onkeydown="mtTab(event)"></td>
+    <td><input class="pt-input"      id="uc-${m.id}"  data-mi value="${esc(m.unitCost)}"             placeholder="0.00" onchange="updateMaterial(${m.id},'unitCost',this.value)"           onkeydown="mtTab(event)"></td>
+    <td><input class="pt-input"      id="mq-${m.id}"  data-mi value="${esc(m.qty)}"                 placeholder="1"    onchange="updateMaterial(${m.id},'qty',this.value)"                onkeydown="mtTab(event)"></td>
+    <td><input class="pt-input"      id="sh-${m.id}"  data-mi value="${esc(m.shipping)}"             placeholder="0.00" onchange="updateMaterial(${m.id},'shipping',this.value)"           onkeydown="mtTab(event)"></td>
+    <td><input class="pt-input"      id="mk-${m.id}"  data-mi value="${esc(m.markupPct)}"            placeholder="0"    onchange="updateMaterial(${m.id},'markupPct',this.value)"          onkeydown="mtTab(event)"></td>
+    <td><div class="mat-totalcost" id="mt-${m.id}">${fmtCurrency(calcMatTotal(m))}</div></td>
+    <td><button class="btn-remove-part" onclick="removeMaterial(${m.id})">&times;</button></td>
+  </tr>`).join('');
+}
+
+/* ── TAB NAV ────────────────────────────────────────────────── */
+function ptTab(e){
+  if(e.key!=='Tab')return;
+  const all=Array.from(document.querySelectorAll('[data-pi]'));
+  const idx=all.indexOf(e.target);if(idx===-1)return;
+  e.preventDefault();
+  if(e.shiftKey){idx>0?all[idx-1].focus():document.getElementById('fMatSupplied').focus();}
+  else{idx<all.length-1?all[idx+1].focus():document.getElementById('btnAddPart').focus();}
+}
+function mtTab(e){
+  if(e.key!=='Tab')return;
+  const all=Array.from(document.querySelectorAll('[data-mi]'));
+  const idx=all.indexOf(e.target);if(idx===-1)return;
+  e.preventDefault();
+  if(e.shiftKey){idx>0?all[idx-1].focus():document.getElementById('btnAddMat').focus();}
+  else{idx<all.length-1?all[idx+1].focus():document.getElementById('btnAddMat').focus();}
+}
+
+/* ── QUOTE NUMBER ───────────────────────────────────────────── */
+async function generateQuoteNumber(){
+  const year=new Date().getFullYear();
+  try{
+    const items=await spGet('Quote Register',`?$select=Title&$filter=startswith(Title,'QT-${year}-')&$orderby=Title desc&$top=1`);
+    let next=1;
+    if(items.length>0){const p=items[0].Title.split('-');if(p.length===3)next=parseInt(p[2],10)+1;}
+    document.getElementById('fQuoteNumber').value=`QT-${year}-${String(next).padStart(3,'0')}`;
+  }catch(e){
+    document.getElementById('fQuoteNumber').value=`QT-${year}-${Date.now().toString().slice(-4)}`;
+    console.warn('Quote number fallback:',e.message);
+  }
+}
+
+/* ── LOAD CUSTOMERS ─────────────────────────────────────────── */
+async function loadCustomers(){
+  try{
+    const items=await spGet('Customers','?$orderby=Title&$top=500');
+    state.customers=items;
+    const dd=document.getElementById('fCustomer');
+    items.forEach(c=>{
+      const o=document.createElement('option');
+      const custId=c.Id||c.ID;
+      o.value=custId; o.textContent=c.Title;
+      o.dataset.name=c.Title;
+      o.dataset.orderType=c.OrderType||'';
+      o.dataset.taxable=c.Taxable?'1':'0';
+      dd.appendChild(o);
+    });
+    showToast(`${items.length} customers loaded`,'success');
+  }catch(e){showToast('Could not load customers: '+e.message,'error');console.error(e);}
+}
+
+/* ── LOAD CONTACTS ──────────────────────────────────────────── */
+async function loadContacts(){
+  try{
+    const items=await spGet('Contacts','?$select=ID,Title,Customer/Title,Customer/ID&$expand=Customer&$orderby=Title&$top=500');
+    state.contacts=items;
+  }catch(e){console.warn('Contacts:',e.message);}
+}
+
+async function loadOrderTypeChoices(){
+  try{
+    const res=await spFetch(`${SITE}/_api/web/lists/getbytitle('Quote Register')/fields?$select=Choices&$filter=InternalName eq 'OrderType'`);
+    const json=await res.json();
+    const choices=(json.value&&json.value[0]&&json.value[0].Choices)||[];
+    const sel=document.getElementById('fOrderType');
+    const cur=sel.value;
+    sel.innerHTML='<option value="">— Select —</option>'+
+      choices.map(ch=>`<option value="${ch}"${cur===ch?' selected':''}>${ch}</option>`).join('');
+  }catch(e){console.warn('OrderType choices:',e.message);}
+}
+
+function filterContacts(name){
+  const dd=document.getElementById('fContact');
+  dd.innerHTML='<option value="">— Select —</option>';
+  const filtered=state.contacts.filter(c=>{
+    const cv=c.Customer;
+    if(!cv) return false;
+    if(typeof cv==='object') return cv.Title===name||cv.Value===name||cv.LookupValue===name;
+    return cv===name;
+  });
+  filtered.forEach(c=>{
+    const o=document.createElement('option');
+    o.value=c.Id||c.ID; o.textContent=c.Title;
+    dd.appendChild(o);
   });
 }
 
-function exportCSV() {
-  const listName = document.getElementById('listSelect').value;
-  const hideRO   = document.getElementById('hideReadOnly').checked;
-  const hideH    = document.getElementById('hideHidden').checked;
-  const rows = allFields
-    .filter(f => !(hideH && f.Hidden) && !(hideRO && f.ReadOnlyField))
-    .map(f => [
-      `"${f.InternalName}"`,
-      `"${f.Title}"`,
-      `"${f.TypeAsString}"`,
-      f.Required?'Yes':'No',
-      f.ReadOnlyField?'Yes':'No',
-      f.Hidden?'Yes':'No',
-      f.Choices?`"${f.Choices.join('; ')}"`:'""'
-    ].join(','));
-  const csv = 'Internal Name,Display Name,Type,Required,Read-Only,Hidden,Choices\n' + rows.join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = `SCW_${listName.replace(/\s+/g,'_')}_Fields.csv`;
-  a.click();
+async function onCustomerChange(){
+  const dd=document.getElementById('fCustomer');
+  const sel=dd.options[dd.selectedIndex];
+  const name=sel.dataset.name||'';
+  const custId=dd.value;
+  const otVal=sel.dataset.orderType||'';
+  const otSel=document.getElementById('fOrderType');
+  otSel.value=otVal;
+  // Fallback: if value didn't match an option, find by text
+  if(otVal && otSel.value!==otVal){
+    const match=Array.from(otSel.options).find(o=>o.textContent.trim()===otVal.trim());
+    if(match) otSel.value=match.value;
+  }
+  if(name){filterContacts(name);await checkLastQuote(name, custId);}
+  else{document.getElementById('fContact').innerHTML='<option value="">— Select —</option>';document.getElementById('lastQuoteNotice').innerHTML='';}
 }
 
-/* ── UTILS ── */
-function esc(v) { return String(v||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-let _toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+async function checkLastQuote(customerName, custId){
+  const notice=document.getElementById('lastQuoteNotice');
+  notice.innerHTML='<span style="color:var(--gray-mid)">&#8230;</span>';
+  try{
+    const items=await spGet('Quote Register',`?$select=Id,Title,Status,DateQuoted,QuoteExpiration&$filter=CustomerId eq ${custId}&$orderby=DateQuoted desc&$top=1`);
+    if(!items.length){notice.innerHTML='';return;}
+    const q=items[0];
+    // Auto-expire if past expiration date
+    if(q.Status==='Quoted'&&q.QuoteExpiration){
+      const expD=new Date(q.QuoteExpiration); expD.setHours(0,0,0,0);
+      const tod=new Date(); tod.setHours(0,0,0,0);
+      if(expD<tod){
+        try{
+          const qId=q.Id||q.ID;
+          await spPatch('Quote Register',qId,{Status:'Expired'});
+          q.Status='Expired';
+        }catch(e){console.warn('Auto-expire failed:',e.message);}
+      }
+    }
+    const rawStatus=q.Status||'Unknown';
+    const date=q.DateQuoted?new Date(q.DateQuoted).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+    const bc=rawStatus==='Accepted'?'badge-won':(rawStatus==='Declined'||rawStatus==='Lost')?'badge-lost':rawStatus==='Quoted'?'badge-quoted':'badge-other';
+    state.lastQuoteData={quoteNumber:q.Title,date,status:rawStatus};
+    notice.innerHTML=`&#8635; Last: <strong>${q.Title}</strong> &nbsp;${date}&nbsp;<span class="badge ${bc}">${rawStatus}</span><span class="lqn-load" onclick="promptLoadLastQuote()">Load</span>`;
+  }catch(e){notice.innerHTML='';console.warn('Last quote:',e.message);}
 }
 
-/* ── BOOT ── */
-window.onload = initAuth;
+function promptLoadLastQuote(){
+  if(!state.lastQuoteData)return;
+  const{quoteNumber,date,status}=state.lastQuoteData;
+  const bc=status==='Accepted'?'badge-won':(status==='Declined'||status==='Lost')?'badge-lost':'badge-quoted';
+  document.getElementById('modalLoadMsg').innerHTML=`Load all parts and materials from:<br><br><strong>${quoteNumber}</strong> &nbsp; ${date} &nbsp;<span class="badge ${bc}">${status}</span><br><br><em style="font-size:11px;color:var(--text-muted)">A new quote number will be assigned. All fields are editable after loading.</em>`;
+  openModal('modalLoadPrompt');
+}
+function confirmLoad(){closeModal('modalLoadPrompt');if(state.lastQuoteData)loadQuoteIntoForm(state.lastQuoteData.quoteNumber);}
+
+/* ── SCREEN 2 ───────────────────────────────────────────────── */
+function renderScreen2(){
+  const dd=document.getElementById('fCustomer'),sel=dd.options[dd.selectedIndex];
+  const ddC=document.getElementById('fContact'),selC=ddC.options[ddC.selectedIndex];
+  const info=[
+    {label:'Quote #',value:document.getElementById('fQuoteNumber').value},
+    {label:'Customer',value:sel&&sel.value?sel.textContent:'—'},
+    {label:'Contact',value:selC&&selC.value?selC.textContent:'—'},
+    {label:'RFQ #',value:document.getElementById('fRFQ').value||'—'},
+    {label:'Quoted By',value:document.getElementById('fQuotedBy').value},
+    {label:'Order Type',value:document.getElementById('fOrderType').value||'—'},
+    {label:'Date Received',value:document.getElementById('fDateReceived').value||'—'},
+    {label:'Expires',value:document.getElementById('fExpiration').value||'—'},
+    {label:'Lead Time',value:(document.getElementById('fLeadTime').value||'—')+' days'},
+    {label:'Description',value:document.getElementById('fDescription').value||'—'},
+    {label:'Mat Supplied By',value:document.getElementById('fMatSupplied').value},
+    {label:'C of C',value:document.getElementById('fCofC').checked?'Required':'No'},
+    {label:'Mill Cert',value:document.getElementById('fMillCert').checked?'Required':'No'},
+  ];
+  document.getElementById('s2InfoGrid').innerHTML=info.map(i=>`<div class="s2-info-item"><span class="s2-info-label">${i.label}</span><span class="s2-info-value">${esc(i.value)}</span></div>`).join('');
+
+  const pTbody=document.getElementById('s2PartsTbody');
+  pTbody.innerHTML=!state.colParts.length?'<tr><td colspan="9" class="parts-empty">No parts</td></tr>':
+    state.colParts.map(p=>{
+      const qtyReq=parseFloat(p.qtyReq)||0,qtyPerRun=parseFloat(p.qtyPerRun)||0;
+      const runs=qtyPerRun>0?Math.ceil(qtyReq/qtyPerRun):0;
+      return `<tr><td style="text-align:left">${esc(p.partNumber)||'—'}</td><td style="text-align:left">${esc(p.description)||'—'}</td><td>${esc(p.machine)}</td><td>${esc(p.matGroup)||'—'}</td><td>${qtyReq||'—'}</td><td>${qtyPerRun||'—'}</td><td>${runs||'—'}</td><td class="s2-line-total">${fmtCurrency(calcUnitPrice(p))}</td><td class="s2-line-total">${fmtCurrency(calcLineTotal(p))}</td></tr>`;
+    }).join('');
+
+  const mTbody=document.getElementById('s2MatTbody');
+  mTbody.innerHTML=!state.colMaterials.length?'<tr><td colspan="3" class="mat-empty">No materials</td></tr>':
+    state.colMaterials.map(m=>`<tr><td style="text-align:left">${esc(m.matGroup)||'—'}</td><td style="text-align:left">${esc(m.materialDescription)||'—'}</td><td class="s2-line-total">${fmtCurrency(calcMatTotal(m))}</td></tr>`).join('');
+
+  updateTotals();
+}
+
+function updateTotals(){
+  const sub=calcSubtotal(),exp=calcExpediteTotal(),tax=calcTax(sub),final=calcFinalTotal(sub);
+  const min=getRate('rMinOrder');
+  const hours=state.colParts.reduce((s,p)=>{
+    const m2=parseFloat(p.minPerRun)||0,qr=parseFloat(p.qtyReq)||0,qpr=parseFloat(p.qtyPerRun)||0;
+    return s+(qpr>0?m2*qr/qpr:0);
+  },0)/60;
+
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('s2Hours',hours>0?hours.toFixed(2)+' hrs':'—');
+  set('s2Subtotal',fmtCurrency(sub));
+  set('s2ExpediteTotal',fmtCurrency(exp));
+  set('s2TaxAmt',fmtCurrency(tax));
+  set('s2FinalTotal',fmtCurrency(final));
+  const taxLbl=document.getElementById('s2TaxLabel');if(taxLbl)taxLbl.textContent=`Tax (${getRate('rTaxRate')}%)`;
+
+  const expType=document.getElementById('s2ExpediteType').value;
+  const expRow=document.getElementById('s2ExpediteRow');if(expRow)expRow.style.display=expType!=='None'?'flex':'none';
+  const taxRow=document.getElementById('s2TaxRow');if(taxRow)taxRow.style.display=isTaxable()?'flex':'none';
+
+  const moq=document.getElementById('s2MoqBanner'),minDisp=document.getElementById('s2MinOrderDisplay');
+  const ovAmt=parseFloat(document.getElementById('s2OverrideAmt').value)||0;
+  if(moq&&minDisp){moq.classList.toggle('visible',ovAmt===0&&(sub+exp+tax)<min&&(sub+exp+tax)>0);minDisp.textContent=fmtCurrency(min);}
+}
+
+/* ── SUBMIT ─────────────────────────────────────────────────── */
+async function submitQuote(){
+  if(isSubmitting){showToast('Submit already in progress','info');return;}
+  const qNum=document.getElementById('fQuoteNumber').value;
+  const cust=document.getElementById('fCustomer');
+  if(!qNum){showToast('Quote number missing','error');return;}
+  if(!cust.value){showToast('Please select a customer','error');return;}
+  if(!state.colParts.length){showToast('Add at least one part','error');return;}
+  // Strip any parts that are entirely blank (auto-added but never filled in)
+  state.colParts=state.colParts.filter(p=>
+    p.partNumber||p.description||p.qtyReq||p.minPerRun||p.vendorCost
+  );
+  if(!state.colParts.length){showToast('Fill in at least one part before submitting','error');return;}
+
+  const btn=document.getElementById('btnSubmit');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Submitting...';
+  isSubmitting=true;
+
+  try{
+    const sub=calcSubtotal(),final=calcFinalTotal(sub);
+    const custSel=cust.options[cust.selectedIndex];
+    const contSel=document.getElementById('fContact');
+
+    // 1 — Quote Register
+    const qrData = {
+      Title:        qNum,
+      RFQNumber:    document.getElementById('fRFQ').value||'',
+      OrderType:    document.getElementById('fOrderType').value||null,
+      DateReceived:     document.getElementById('fDateReceived').value||null,
+      QuoteExpiration:  document.getElementById('fExpiration').value||null,
+      Description:   document.getElementById('fDescription').value||'',
+      CofCRequired:  document.getElementById('fCofC').checked,
+      MillCertRequired: document.getElementById('fMillCert').checked,
+      QuotedBy:     document.getElementById('fQuotedBy').value,
+      DateQuoted:   new Date().toISOString(),
+      QuoteAmount:  final,
+      Status:       'Quoted',
+      Notes:        document.getElementById('s2Notes').value||'',
+    };
+    if(cust.value)     qrData.CustomerId = parseInt(cust.value);
+    if(contSel.value)  qrData.ContactId  = parseInt(contSel.value);
+    const qrItem = await spPost('Quote Register', qrData);
+    const qrId = qrItem.ID || qrItem.Id || qrItem.id;
+
+    // 2 — Quote Line Items
+    for(let i=0;i<state.colParts.length;i++){
+      const p=state.colParts[i];
+      const liData = {
+        Title:            `${qNum}-${String(i+1).padStart(2,'0')}`,
+        PartNumber:       p.partNumber||'',
+        Description:      p.description||'',
+        Machine:          p.machine||'Waterjet',
+        MaterialGroup:    p.matGroup||'',
+        Thickness:        parseFloat(p.thickness)||null,
+        Width:            parseFloat(p.width)||null,
+        Length:           parseFloat(p.length)||null,
+        QtyRequested:     parseFloat(p.qtyReq)||null,
+        QtyPerRun:        parseFloat(p.qtyPerRun)||null,
+        OMAXMinutes:      parseFloat(p.minPerRun)||null,
+        Pierces:          parseFloat(p.piercesPerRun)||null,
+        'Garnet_x0028_lbs_x0029_': parseFloat(p.garnetPerRun)||null,
+        Setup:            parseFloat(p.setupPerRun)||null,
+        JetbrickIntensity: parseFloat(p.jetbrickPerRun)||null,
+        LaserSetupCost:   parseFloat(p.laserSetup)||null,
+        LaserPerPieceCost:parseFloat(p.laserPerPiece)||null,
+        FinalUnitPrice:   calcUnitPrice(p),
+        AllocatedMaterialCost: calcAllocMat(p),
+        CalculatedUnitPrice:   calcUnitPrice(p),
+        MaterialSuppliedBy:    document.getElementById('fMatSupplied').value||'SCW',
+        VendorName:            p.vendorName||null,
+        VendorPartNumber:      p.vendorPartNumber||null,
+        VendorCost:            parseFloat(p.vendorCost)||null,
+        'VendorMarkup_x0025_': parseFloat(p.vendorMarkup)||null,
+      };
+      if(qrId) liData.QuoteNumberId = qrId;
+      await spPost('Quote Line Items', liData);
+    }
+
+    // 3 — Quote Materials
+    for(const m of state.colMaterials){
+      const matData = {
+        Title:               `${qNum}-${m.matGroup}`,
+        MaterialGroup:       m.matGroup||'',
+        MaterialDescription: m.materialDescription||'',
+        UnitCost:            parseFloat(m.unitCost)||null,
+        Qty:                 parseFloat(m.qty)||null,
+        Shipping:            parseFloat(m.shipping)||null,
+        'Markup_x0025_':     parseFloat(m.markupPct)||null,
+        TotalCost:           calcMatTotal(m),
+        VendorName:          m.vendorName||null,
+        VendorPartNumber:    m.vendorPartNumber||null,
+      };
+      if(qrId) matData.QuoteNumberId = qrId;
+      await spPost('Quote Materials', matData);
+    }
+
+
+    document.getElementById('modalSuccessMsg').innerHTML=`<strong>${qNum}</strong> submitted successfully!<br><br>Quote Amount: <strong>${fmtCurrency(final)}</strong>`;
+    openModal('modalSuccess');
+
+  }catch(err){
+    document.getElementById('modalErrorMsg').innerHTML=`<strong>Submission failed:</strong><br><br>${err.message}<br><br><em style="font-size:10px;color:var(--text-muted)">Open browser DevTools (F12) → Console for full details. Most likely a SharePoint field name mismatch — tell Greg which field failed and it can be fixed quickly.</em>`;
+    openModal('modalError');
+    console.error('Submit error:',err);
+  }finally{
+    btn.disabled=false; btn.innerHTML='Submit Quote';
+    isSubmitting=false;
+  }
+}
+
+function afterSubmitSuccess(){closeModal('modalSuccess');doStartFresh();}
+
+/* ── SCREEN NAV ─────────────────────────────────────────────── */
+function showScreen(n){
+  document.getElementById('screen1').classList.toggle('active',n===1);
+  document.getElementById('screen2').classList.toggle('active',n===2);
+  document.getElementById('tab1').classList.toggle('active',n===1);
+  document.getElementById('tab2').classList.toggle('active',n===2);
+  if(n===2)renderScreen2();
+}
+function goToScreen2(){showScreen(2);}
+
+/* ── START FRESH ────────────────────────────────────────────── */
+function startFresh(){openModal('modalConfirmFresh');}
+function doStartFresh(){
+  ['fCustomer','fOrderType','fRFQ','fLeadTime','fDescription','fExpiration'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fContact').innerHTML='<option value="">— Select —</option>';
+  document.getElementById('fMatSupplied').value='SCW';
+  document.getElementById('fCofC').checked=false;
+  document.getElementById('fMillCert').checked=false;
+  if(state.loginFirstName){
+    const dd=document.getElementById('fQuotedBy');
+    const match=Array.from(dd.options).find(o=>o.value.toLowerCase()===state.loginFirstName.toLowerCase());
+    dd.value=match?match.value:state.loginFirstName;
+  }
+  document.getElementById('lastQuoteNotice').innerHTML='';
+  document.getElementById('s2Notes').value='';
+  document.getElementById('s2ExpediteType').value='None';
+  document.getElementById('s2ExpediteAmt').value='0';
+  document.getElementById('s2OverrideAmt').value='';
+  state.colParts=[];state.colMaterials=[];state.nextPartId=1;state.nextMatId=1;
+  setDefaultDate();generateQuoteNumber();renderPartsTable();renderMaterialsTable();showScreen(1);
+  addPart();
+  showToast('New quote started','success');
+}
+
+function setDefaultDate(){
+  const today=new Date();
+  document.getElementById('fDateReceived').value=today.toISOString().split('T')[0];
+  const exp=new Date(today);exp.setDate(exp.getDate()+30);
+  document.getElementById('fExpiration').value=exp.toISOString().split('T')[0];
+}
+
+/* ── HELPERS ────────────────────────────────────────────────── */
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function openLibrary(){
+  // Populate customer dropdown from already-loaded state.customers
+  const dd=document.getElementById('libCustomer');
+  dd.innerHTML='<option value="">— All Customers —</option>';
+  (state.customers||[]).forEach(cu=>{
+    const o=document.createElement('option');
+    o.value=cu.Id||cu.ID; o.textContent=cu.Title;
+    dd.appendChild(o);
+  });
+  openModal('modalLibrary');
+}
+
+function clearLibSearch(){
+  document.getElementById('libCustomer').value='';
+  document.getElementById('libPartNum').value='';
+  document.getElementById('libResults').innerHTML='<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-muted);font-style:italic">Enter a customer or part number and click Search</td></tr>';
+  document.getElementById('libResultCount').textContent='';
+}
+
+async function expireAllStaleQuotes(){
+  // Runs once on load — patches ALL Quoted rows past their expiration date
+  try{
+    const today=new Date(); today.setHours(0,0,0,0);
+    const items=await spGet('Quote Register',
+      `?$select=Id,Title,QuoteExpiration&$filter=Status eq 'Quoted' and QuoteExpiration lt '${today.toISOString()}'&$top=500`
+    );
+    if(!items.length) return;
+    for(const q of items){
+      const qId=q.Id||q.ID;
+      try{
+        await spPatch('Quote Register', qId, {Status:'Expired'});
+      }catch(e){ console.warn(`Could not expire QR item ${qId}:`, e.message); }
+    }
+    console.log(`Auto-expired ${items.length} quote(s)`);
+  }catch(e){ console.warn('expireAllStaleQuotes failed:', e.message); }
+}
+
+async function expireStaleQuotes(qrMeta){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const toExpire=Object.values(qrMeta).filter(q=>
+    q.status==='Quoted' && q.expDate && new Date(q.expDate)<today
+  );
+  for(const q of toExpire){
+    try{
+      await spPatch('Quote Register', q.id, {Status:'Expired'});
+      q.status='Expired'; // update local map so display reflects immediately
+    }catch(e){ console.warn('Could not expire quote',q.id,e.message); }
+  }
+  return toExpire.length;
+}
+
+async function searchLibrary(){
+  const custId=document.getElementById('libCustomer').value;
+  const partRaw=document.getElementById('libPartNum').value.trim();
+  if(!custId&&!partRaw){showToast('Enter a customer or part number to search','info');return;}
+
+  const tbody=document.getElementById('libResults');
+  tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text-muted)">Searching…</td></tr>';
+  document.getElementById('libResultCount').textContent='';
+
+  try{
+    let quoteFilter='';
+    // qrMeta: map of quoteTitle -> {status, date} — built when customer is selected
+    const qrMeta={};
+
+    // If customer selected: get their QR records for IDs + metadata
+    if(custId){
+      const qrItems=await spGet('Quote Register',`?$select=Id,Title,Status,DateQuoted,QuoteExpiration&$filter=CustomerId eq ${custId}&$orderby=DateQuoted desc&$top=20`);
+      if(!qrItems.length){
+        tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text-muted)">No quotes found for this customer</td></tr>';
+        return;
+      }
+      qrItems.forEach(q=>{
+        const id=q.Id||q.ID;
+        qrMeta[q.Title]={status:q.Status||'—',date:q.DateQuoted||null,expDate:q.QuoteExpiration||null,id};
+      });
+      const ids=Object.values(qrMeta).map(v=>v.id).filter(Boolean);
+      quoteFilter=ids.map(id=>`QuoteNumberId eq ${id}`).join(' or ');
+      quoteFilter=`(${quoteFilter})`;
+      // Silently expire any overdue quotes before building results
+      await expireStaleQuotes(qrMeta);
+    }
+
+    // Part number filter
+    let partFilter='';
+    if(partRaw) partFilter=`substringof('${partRaw.replace(/'/g,"''")}',PartNumber)`;
+
+    const filter=[quoteFilter,partFilter].filter(Boolean).join(' and ');
+    // NOTE: QuoteNumber/Status cannot be $selected through expand (SP limitation).
+    // Status comes from qrMeta when customer is selected; shows — for part-only search.
+    const qs=`?$select=Title,PartNumber,Description,Machine,QtyRequested,FinalUnitPrice,MaterialGroup,QuoteNumber/Title,QuoteNumber/DateQuoted&$expand=QuoteNumber&$top=150&$orderby=Title desc`+(filter?`&$filter=${filter}`:'');
+
+    const items=await spGet('Quote Line Items',qs);
+
+    if(!items.length){
+      tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text-muted)">No results found</td></tr>';
+      return;
+    }
+
+    let prevQ='';
+    const rows=items.map(item=>{
+      const qn=item.QuoteNumber||{};
+      const qNum=qn.Title||'—';
+      // Date: prefer from qrMeta (has TZ-correct value), fall back to expand
+      const rawDate=(qrMeta[qNum]&&qrMeta[qNum].date)||qn.DateQuoted||null;
+      const date=rawDate?new Date(rawDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}):'—';
+      const status=(qrMeta[qNum]&&qrMeta[qNum].status)||'—';
+      const bc=status==='Accepted'?'badge-won':status==='Declined'||status==='Lost'?'badge-lost':status==='Quoted'?'badge-quoted':'badge-other';
+      const rowBg=qNum!==prevQ&&prevQ!==''?'background:#f0f4fa':'';
+      prevQ=qNum;
+      return `<tr style="${rowBg}">
+        <td style="padding:4px 8px;white-space:nowrap;font-weight:600;color:var(--navy)">${esc(qNum)}</td>
+        <td style="padding:4px 8px;white-space:nowrap;color:var(--text-muted)">${date}</td>
+        <td style="padding:4px 8px;white-space:nowrap">${esc(item.PartNumber||'—')}</td>
+        <td style="padding:4px 8px">${esc(item.Description||'—')}</td>
+        <td style="padding:4px 8px;text-align:center;white-space:nowrap">${esc(item.Machine||'—')}</td>
+        <td style="padding:4px 8px;text-align:center">${item.QtyRequested||'—'}</td>
+        <td style="padding:4px 8px;text-align:right">${fmtCurrency(item.FinalUnitPrice||0)}</td>
+        <td style="padding:4px 8px;text-align:center">
+          <span class="badge ${bc}">${status}</span>
+          ${(()=>{const exp=qrMeta[qNum]&&qrMeta[qNum].expDate;if(!exp)return'';const d=new Date(exp);return d<new Date()?'<span style="font-size:9px;color:var(--red);display:block;margin-top:2px">Expired</span>':''})()}
+        </td>
+        <td style="padding:4px 8px;text-align:center;white-space:nowrap">
+          <button class="btn btn-secondary" style="font-size:10px;padding:2px 8px;margin-right:3px" onclick="loadQuoteFromLib('${esc(qNum)}')">Load</button>
+          <button class="btn btn-ghost"     style="font-size:10px;padding:2px 8px;color:var(--navy);margin-right:3px" onclick="reviseQuoteFromLib('${esc(qNum)}')">Revise</button>
+          <button class="btn btn-ghost"     style="font-size:10px;padding:2px 8px;color:var(--green);border-color:var(--green);margin-right:3px" onclick="openUpdateQuote('${esc(qNum)}','${status}',qrMeta['${esc(qNum)}']&&qrMeta['${esc(qNum)}'].id)">Update</button>
+          <button class="btn btn-ghost"     style="font-size:10px;padding:2px 8px;color:#6a1b9a;border-color:#6a1b9a" onclick="openPromote('${esc(qNum)}',qrMeta['${esc(qNum)}']&&qrMeta['${esc(qNum)}'].id)">Promote</button>
+        </td>
+      </tr>`;
+    }).join('');
+
+    tbody.innerHTML=rows;
+    document.getElementById('libResultCount').textContent=`${items.length} part row${items.length!==1?'s':''}`;
+  }catch(e){
+    tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--red)">Error: ${e.message}</td></tr>`;
+    console.error('Library search:',e);
+  }
+}
+
+async function generateRevisionNumber(baseQuoteNumber){
+  // Strip any existing revision suffix to get the base (e.g. QT-2026-001-R1 → QT-2026-001)
+  const base=baseQuoteNumber.replace(/-R\d+$/,'');
+  try{
+    // Find highest existing revision for this base
+    const items=await spGet('Quote Register',
+      `?$select=Title&$filter=startswith(Title,'${base}-R')&$orderby=Title desc&$top=10`);
+    let nextRev=1;
+    if(items.length>0){
+      const revNums=items.map(i=>{
+        const m=i.Title.match(/-R(\d+)$/);
+        return m?parseInt(m[1],10):0;
+      });
+      nextRev=Math.max(...revNums)+1;
+    }
+    return `${base}-R${nextRev}`;
+  }catch(e){
+    console.warn('Revision number fallback:',e.message);
+    return `${base}-R1`;
+  }
+}
+
+// ── PROMOTE TO JOB ───────────────────────────────────────────
+let _pmQuoteNumber = null;
+let _pmQrId        = null;
+let _pmParts       = [];  // line items loaded for this quote
+
+async function openPromote(quoteNumber, qrId){
+  _pmQuoteNumber = quoteNumber;
+  _pmQrId        = qrId;
+  _pmParts       = [];
+
+  // Reset inputs
+  document.getElementById('pmPO').value        = '';
+  document.getElementById('pmDueDate').value   = '';
+  document.getElementById('pmQLevel').value    = '';
+  document.getElementById('pmDrawingRev').value= '';
+  document.getElementById('pmCheckAll').checked= true;
+  document.getElementById('pmPartsTbody').innerHTML =
+    '<tr><td colspan="8" style="text-align:center;padding:16px;color:var(--text-muted)">Loading parts…</td></tr>';
+  openModal('modalPromote');
+
+  try{
+    // Need QR ID if not passed (part-only search path)
+    let resolvedQrId = qrId;
+    if(!resolvedQrId){
+      const qrItems = await spGet('Quote Register',`?$select=Id&$filter=Title eq '${quoteNumber}'&$top=1`);
+      if(qrItems.length) resolvedQrId = qrItems[0].Id||qrItems[0].ID;
+    }
+    _pmQrId = resolvedQrId;
+
+    // Load line items
+    const items = await spGet('Quote Line Items',
+      `?$filter=QuoteNumberId eq ${resolvedQrId}&$orderby=Title`);
+    _pmParts = items;
+
+    if(!items.length){
+      document.getElementById('pmPartsTbody').innerHTML =
+        '<tr><td colspan="8" style="text-align:center;padding:16px;color:var(--text-muted)">No parts found on this quote</td></tr>';
+      return;
+    }
+
+    // Load customer name for pre-fill
+    const qrFull = await spGet('Quote Register',`?$filter=Title eq '${quoteNumber}'&$top=1`);
+    const qr = qrFull[0]||{};
+    // Pre-fill PO from PONumber if already set
+    if(qr.PONumber) document.getElementById('pmPO').value = qr.PONumber;
+
+    // Render parts table
+    document.getElementById('pmPartsTbody').innerHTML = items.map((p,i)=>`<tr style="${i%2?'background:#f5f8fc':''}">
+      <td style="padding:4px 8px;text-align:center"><input type="checkbox" class="pm-chk" data-idx="${i}" checked style="accent-color:var(--navy)"></td>
+      <td style="padding:4px 8px;font-family:var(--mono);font-size:11px">${esc(p.PartNumber||'—')}</td>
+      <td style="padding:4px 8px">${esc(p.Description||'—')}</td>
+      <td style="padding:4px 8px;text-align:center">${esc(p.Machine||'—')}</td>
+      <td style="padding:4px 8px">${esc(p.MaterialGroup||'—')}</td>
+      <td style="padding:4px 8px;text-align:center">${p.Thickness!=null?p.Thickness:'—'}</td>
+      <td style="padding:4px 8px;text-align:center">${p.QtyRequested||'—'}</td>
+      <td style="padding:4px 8px;text-align:center">${(p.LaserSetupCost||p.LaserPerPieceCost)?'✓':'—'}</td>
+    </tr>`).join('');
+  }catch(e){
+    document.getElementById('pmPartsTbody').innerHTML =
+      `<tr><td colspan="8" style="text-align:center;padding:16px;color:var(--red)">Error: ${e.message}</td></tr>`;
+  }
+}
+
+function pmToggleAll(checked){
+  document.querySelectorAll('.pm-chk').forEach(cb=>cb.checked=checked);
+}
+
+async function submitPromote(){
+  const po = document.getElementById('pmPO').value.trim();
+  if(!po){showToast('PO # is required','error');document.getElementById('pmPO').focus();return;}
+
+  const dueDate    = document.getElementById('pmDueDate').value||null;
+  const qLevel     = document.getElementById('pmQLevel').value||null;
+  const drawingRev = document.getElementById('pmDrawingRev').value.trim()||null;
+
+  // Get selected parts
+  const selected = Array.from(document.querySelectorAll('.pm-chk'))
+    .filter(cb=>cb.checked)
+    .map(cb=>_pmParts[parseInt(cb.dataset.idx)]);
+
+  if(!selected.length){showToast('Select at least one part','error');return;}
+
+  // Load QR for customer/contact/matSource
+  let qr = {};
+  try{
+    const qrItems = await spGet('Quote Register',`?$filter=Title eq '${_pmQuoteNumber}'&$top=1`);
+    qr = qrItems[0]||{};
+  }catch(e){}
+
+  // Resolve customer name
+  const custDD  = document.getElementById('fCustomer');
+  const custOpt = Array.from(custDD.options).find(o=>parseInt(o.value)===(qr.CustomerId));
+  const custName= custOpt?custOpt.dataset.name:'';
+
+  // Resolve contact name
+  const contDD  = document.getElementById('fContact');
+  const contOpt = Array.from(contDD.options).find(o=>parseInt(o.value)===(qr.ContactId));
+  const contName= contOpt?contOpt.textContent:'';
+
+  // Map MaterialSuppliedBy → MaterialSource
+  const matSrcMap = {'SCW':'SCW Supplied','Customer':'Customer Supplied','Mixed':'Mixed'};
+  const matSource = matSrcMap[qr.MaterialSuppliedBy]||'SCW Supplied';
+
+  const today = new Date().toISOString().split('T')[0];
+  let created = 0, errors = 0;
+
+  for(const p of selected){
+    const jobData = {
+      Title:          po,
+      Customer:       custName,
+      PointofContact: contName,
+      Description:    qr.Description||p.Description||'',
+      PartNumber:     p.PartNumber||'',
+      Material:       p.MaterialGroup||'',
+      Thickness:      p.Thickness!=null?String(p.Thickness):'',
+      QtyOrdered:     parseFloat(p.QtyRequested)||null,
+      MaterialSource: matSource,
+      DateCreated:    today,
+      Status:         'New',
+      Marking:        !!(p.LaserSetupCost||p.LaserPerPieceCost),
+      DrawingRev:     drawingRev,
+      QLevel:         qLevel,
+    };
+    if(dueDate) jobData.DueDate = dueDate;
+
+    try{
+      await spPost('Job Register', jobData);
+      created++;
+    }catch(e){
+      errors++;
+      console.error('Job create failed for part',p.PartNumber,e.message);
+    }
+  }
+
+  // Mark quote as Accepted if not already
+  if(_pmQrId && qr.Status !== 'Accepted'){
+    try{ await spPatch('Quote Register', _pmQrId, {Status:'Accepted', PONumber:po}); }
+    catch(e){ console.warn('Could not update QR status:',e.message); }
+  }
+
+  closeModal('modalPromote');
+  if(errors===0){
+    showToast(`${created} job${created!==1?'s':''} created · Quote marked Accepted`,'success');
+  } else {
+    showToast(`${created} created, ${errors} failed — check console`,'error');
+  }
+  await searchLibrary(); // refresh library to show Accepted status
+}
+
+// ── WIN/LOSS UPDATE ──────────────────────────────────────────
+let _uqId = null; // QR item ID being updated
+
+function openUpdateQuote(quoteNumber, currentStatus, qrId){
+  _uqId = qrId;
+  document.getElementById('uqTitle').textContent = quoteNumber;
+  document.getElementById('uqStatus').value = currentStatus||'Quoted';
+  document.getElementById('uqWinLossReason').value = '';
+  document.getElementById('uqPONumber').value = '';
+  onUqStatusChange();
+  openModal('modalUpdateQuote');
+}
+
+function onUqStatusChange(){
+  const s=document.getElementById('uqStatus').value;
+  const showReason=['Accepted','Declined','Lost'].includes(s);
+  const showPO=s==='Accepted';
+  document.getElementById('uqWinLossRow').style.display=showReason?'block':'none';
+  document.getElementById('uqPORow').style.display=showPO?'block':'none';
+}
+
+async function submitQuoteUpdate(){
+  if(!_uqId){showToast('No quote ID — please search again','error');return;}
+  const status=document.getElementById('uqStatus').value;
+  const reason=document.getElementById('uqWinLossReason').value.trim();
+  const po=document.getElementById('uqPONumber').value.trim();
+  const data={Status:status};
+  if(reason) data['Win_x002f_LossReason']=reason;
+  if(po)     data.PONumber=po;
+  try{
+    await spPatch('Quote Register', _uqId, data);
+    closeModal('modalUpdateQuote');
+    showToast(`Quote updated to ${status}`,'success');
+    // Refresh current search results to reflect new status
+    await searchLibrary();
+  }catch(e){
+    showToast('Update failed: '+e.message,'error');
+  }
+}
+
+async function reviseQuoteFromLib(quoteNumber){
+  closeModal('modalLibrary');
+  await loadQuoteIntoForm(quoteNumber, true); // true = revision mode
+}
+
+async function loadQuoteFromLib(quoteNumber){
+  closeModal('modalLibrary');
+  await loadQuoteIntoForm(quoteNumber);
+}
+
+async function loadQuoteIntoForm(quoteNumber, revise=false){
+  showToast('Loading quote…','info');
+  try{
+    // 1 — Quote Register header
+    const qrItems=await spGet('Quote Register',`?$filter=Title eq '${quoteNumber}'&$top=1`);
+    if(!qrItems.length){showToast('Quote not found','error');return;}
+    const qr=qrItems[0];
+    const qrId=qr.Id||qr.ID;
+
+    // 2 — Line Items
+    const liItems=await spGet('Quote Line Items',`?$filter=QuoteNumberId eq ${qrId}&$orderby=Title`);
+
+    // 3 — Materials
+    const matItems=await spGet('Quote Materials',`?$filter=QuoteNumberId eq ${qrId}&$orderby=Title`);
+
+    // 4 — Populate header
+    const custDD=document.getElementById('fCustomer');
+    const custId=qr.CustomerId;
+    if(custId){
+      Array.from(custDD.options).forEach(o=>{if(parseInt(o.value)===custId)custDD.value=o.value;});
+      await onCustomerChange();
+      // Select contact after filter runs
+      const contId=qr.ContactId;
+      if(contId){
+        const contDD=document.getElementById('fContact');
+        Array.from(contDD.options).forEach(o=>{if(parseInt(o.value)===contId)contDD.value=o.value;});
+      }
+    }
+    document.getElementById('fRFQ').value=qr.RFQNumber||'';
+    if(qr.QuoteExpiration)document.getElementById('fExpiration').value=qr.QuoteExpiration.split('T')[0];
+    else setDefaultDate(); // auto-set 30 days if not stored
+    document.getElementById('fDescription').value=qr.Description||'';
+    if(qr.QuotedBy)document.getElementById('fQuotedBy').value=qr.QuotedBy;
+    if(qr.MaterialSuppliedBy)document.getElementById('fMatSupplied').value=qr.MaterialSuppliedBy;
+    document.getElementById('fCofC').checked=!!qr.CofCRequired;
+    document.getElementById('fMillCert').checked=!!qr.MillCertRequired;
+    setDefaultDate();
+
+    // 5 — Rebuild colParts
+    state.nextPartId=1;
+    state.colParts=liItems.map(li=>({
+      id:state.nextPartId++,
+      partNumber:li.PartNumber||'',
+      description:li.Description||'',
+      machine:li.Machine||'Waterjet',
+      matGroup:li.MaterialGroup||'',
+      thickness:li.Thickness!=null?li.Thickness:'',
+      width:li.Width!=null?li.Width:'',
+      length:li.Length!=null?li.Length:'',
+      qtyReq:li.QtyRequested!=null?li.QtyRequested:'',
+      qtyPerRun:li.QtyPerRun!=null?li.QtyPerRun:'',
+      minPerRun:li.OMAXMinutes!=null?li.OMAXMinutes:'',
+      piercesPerRun:li.Pierces!=null?li.Pierces:'',
+      garnetPerRun:li['Garnet_x0028_lbs_x0029_']!=null?li['Garnet_x0028_lbs_x0029_']:'',
+      setupPerRun:li.Setup!=null?li.Setup:'',
+      jetbrickPerRun:li.JetbrickIntensity!=null?li.JetbrickIntensity:'',
+      laserSetup:li.LaserSetupCost!=null?li.LaserSetupCost:'',
+      laserPerPiece:li.LaserPerPieceCost!=null?li.LaserPerPieceCost:'',
+      vendorName:li.VendorName||'', vendorPartNumber:li.VendorPartNumber||'',
+      vendorCost:li.VendorCost!=null?li.VendorCost:'',
+      vendorMarkup:li['VendorMarkup_x0025_']!=null?li['VendorMarkup_x0025_']:'',
+    }));
+
+    // 6 — Rebuild colMaterials
+    state.nextMatId=1;
+    state.colMaterials=matItems.map(m=>({
+      id:state.nextMatId++,
+      matGroup:m.MaterialGroup||'',
+      materialDescription:m.MaterialDescription||'',
+      unitCost:m.UnitCost!=null?m.UnitCost:'',
+      qty:m.Qty!=null?m.Qty:'',
+      shipping:m.Shipping!=null?m.Shipping:'',
+      markupPct:m['Markup_x0025_']!=null?m['Markup_x0025_']:'',
+      vendorName:m.VendorName||'', vendorPartNumber:m.VendorPartNumber||'',
+    }));
+
+    // 7 — Quote number, render, show entry screen
+    if(revise){
+      const revNum=await generateRevisionNumber(quoteNumber);
+      document.getElementById('fQuoteNumber').value=revNum;
+      renderPartsTable();
+      renderMaterialsTable();
+      showScreen(1);
+      showToast(`Revision ${revNum} created from ${quoteNumber}`,'success');
+    }else{
+      await generateQuoteNumber();
+      renderPartsTable();
+      renderMaterialsTable();
+      showScreen(1);
+      showToast(`Loaded from ${quoteNumber} — new quote number assigned`,'success');
+    }
+  }catch(e){
+    showToast('Error loading quote: '+e.message,'error');
+    console.error('loadQuoteIntoForm:',e);
+  }
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});});
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));});
+function setStatus(type,msg){document.getElementById('statusDot').className='status-dot'+(type==='connected'?' connected':type==='error'?' error':'');document.getElementById('statusText').textContent=msg;}
+function showToast(msg,type='info'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(type==='success'?' success':type==='error'?' error':'');clearTimeout(t._timer);t._timer=setTimeout(()=>{t.className='toast';},3000);}
+
+/* ── BOOT ───────────────────────────────────────────────────── */
+window.addEventListener('load', initAuth);
 </script>
 </body>
 </html>
