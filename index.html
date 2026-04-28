@@ -188,7 +188,10 @@ async function initAuth() {
 
 async function signIn() {
   document.getElementById('loginError').textContent = '';
-  try { await msalInstance.loginRedirect({ scopes:[SP_SCOPE] }); }
+  try {
+    if(!msalInstance) await initAuth();
+    await msalInstance.loginRedirect({ scopes:[SP_SCOPE] });
+  }
   catch(e) { document.getElementById('loginError').textContent = 'Sign-in failed: ' + e.message; }
 }
 
@@ -346,7 +349,7 @@ function showToast(msg) {
 }
 
 /* ── BOOT ── */
-document.addEventListener('DOMContentLoaded', initAuth);
+window.onload = initAuth;
 </script>
 </body>
 </html>
